@@ -2,7 +2,7 @@ module PacificNobleGasRelic
 
 using PyCall, PyPlot, DrWatson, TMI, TMItransient
 
-export vintage_diagnostics
+export vintages_planview, vintages_section
 
 const mpl = PyNULL()
 const plt = PyNULL()
@@ -60,7 +60,7 @@ function planviewplotcartopy(c::Field{T}, depth, lims;titlelabel="section plot")
 
 end
 
-function vintage_diagnostics(params)
+function vintages_planview(params)
 
     @unpack vintage, depth, tinterval, longname = params 
 
@@ -79,6 +79,32 @@ function vintage_diagnostics(params)
     # Plan view plots
     PacificNobleGasRelic.planviewplotcartopy(100g, depth, 0:5:50, titlelabel=tlabel)
     mv(plotsdir("vintage.png"),plotsdir(froot),force=true)
+
+end
+
+function vintages_section(params)
+
+    @unpack vintage, lon, tinterval, longname = params 
+
+    lims = 0:5:50
+    # doing this every time, not so efficient
+    Δ,τ = read_stepresponse()
+
+    
+    froot = plotsdir(savename("TMI_4x4_2012",params,"png",accesses=["vintage","lon"]))
+    println(froot)
+
+    tlabel = "Vintage: "* longname[vintage] * " " * string(tinterval[vintage]) * " CE, lon="*string(lon)*"E"
+    println(tlabel)
+    #fname = "vintage_"*string(v)*"_"*string(depth)*"m.png"
+
+    local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
+
+    sectionplot(g, lon, lims;titlelabel=tlabel) 
+
+    # Plan view plots
+    PacificNobleGasRelic.planviewplotcartopy(100g, depth, 0:5:50, titlelabel=tlabel)
+    savefig(plotsdir(froot))
 
 end
 

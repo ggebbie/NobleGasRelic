@@ -10,17 +10,24 @@ tinterval = Dict(:MOD => (1860, 2022),
 longname = Dict(:MOD => "Modern Warming",
                 :LIA => "Little Ice Age",
                 :MCA => "Medieval Climate Anomaly",
-                :LALIA => "Dark Ages Cold Period",
-                :LALIA2 => "Dark Ages Cold Period (strict)",
+                :DACP => "Dark Ages Cold Period",
+                :DACP2 => "Dark Ages Cold Period (strict)",
                 :RWP => "Roman Warm Period")
 
 vintage = collect(keys(tinterval))
 depth = collect(2000:500:4000)
+lon = [180, 220]
 
 params = @strdict vintage depth tinterval longname
 dicts = dict_list(params)
 
 # planviews
 map(vintages_planview,dicts)
+
+## sections
+
+params = @strdict vintage lon tinterval longname
+dicts = dict_list(params)
+
 
 # get some TTDs so that we can take difference of TTDs
