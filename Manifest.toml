@@ -20,15 +20,15 @@ version = "0.2.0"
 
 [[deps.ArrayInterface]]
 deps = ["ArrayInterfaceCore", "Compat", "IfElse", "LinearAlgebra", "Static"]
-git-tree-sha1 = "4244e1be1dd8bae3c26e97dd84c08c56deb3881c"
+git-tree-sha1 = "ff29cb1b13fe4db6a944bff087ad202fc3c3fc5f"
 uuid = "4fba245c-0d91-5ea0-9b3e-6abc04ee57a9"
-version = "6.0.1"
+version = "6.0.2"
 
 [[deps.ArrayInterfaceCore]]
 deps = ["LinearAlgebra", "SparseArrays", "SuiteSparse"]
-git-tree-sha1 = "8a9c02f9d323d4dd8a47245abb106355bf7b45e6"
+git-tree-sha1 = "8cf9950ecb894a76d5908e0633c9272784d52f95"
 uuid = "30b0a656-2188-435a-8636-2ec0e6a096e2"
-version = "0.1.2"
+version = "0.1.3"
 
 [[deps.ArrayInterfaceGPUArrays]]
 deps = ["Adapt", "ArrayInterfaceCore", "GPUArrays", "LinearAlgebra"]
@@ -297,9 +297,9 @@ version = "0.4.0"
 
 [[deps.DiffEqBase]]
 deps = ["ArrayInterfaceCore", "ChainRulesCore", "DEDataArrays", "DataStructures", "Distributions", "DocStringExtensions", "FastBroadcast", "ForwardDiff", "FunctionWrappers", "IterativeSolvers", "LabelledArrays", "LinearAlgebra", "Logging", "MuladdMacro", "NonlinearSolve", "Parameters", "PreallocationTools", "Printf", "RecursiveArrayTools", "RecursiveFactorization", "Reexport", "Requires", "SciMLBase", "Setfield", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "ZygoteRules"]
-git-tree-sha1 = "9f3bddf45d0dcb21ed0957a71ae545daeb27683c"
+git-tree-sha1 = "ee1edeafeb79f09c828f0bd22c5528ad26737a70"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "6.87.0"
+version = "6.88.0"
 
 [[deps.DiffEqCallbacks]]
 deps = ["DataStructures", "DiffEqBase", "ForwardDiff", "LinearAlgebra", "NLsolve", "OrdinaryDiffEq", "Parameters", "RecipesBase", "RecursiveArrayTools", "SciMLBase", "StaticArrays"]
@@ -355,9 +355,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[deps.Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "d29d8faf1a0ca59167f04edd4d0eb971a6ae009c"
+git-tree-sha1 = "bce284ca37794e3d1e072009b8a44526afe755aa"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.59"
+version = "0.25.60"
 
 [[deps.DocStringExtensions]]
 deps = ["LibGit2"]
@@ -866,9 +866,9 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 
 [[deps.LinearSolve]]
 deps = ["ArrayInterfaceCore", "DocStringExtensions", "GPUArrays", "IterativeSolvers", "KLU", "Krylov", "KrylovKit", "LinearAlgebra", "RecursiveFactorization", "Reexport", "SciMLBase", "Setfield", "SparseArrays", "SuiteSparse", "UnPack"]
-git-tree-sha1 = "5b095894601b8d53b025f8a8235a75e4b21c49e4"
+git-tree-sha1 = "7c2d2127793a167fabda1a2303ab9558808e4d6f"
 uuid = "7ed4a6bd-45f5-4d41-b270-4a48e9bafcae"
-version = "1.17.0"
+version = "1.18.0"
 
 [[deps.LogExpFunctions]]
 deps = ["ChainRulesCore", "ChangesOfVariables", "DocStringExtensions", "InverseFunctions", "IrrationalConstants", "LinearAlgebra"]
@@ -881,9 +881,9 @@ uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[deps.LoopVectorization]]
 deps = ["ArrayInterface", "ArrayInterfaceOffsetArrays", "ArrayInterfaceStaticArrays", "CPUSummary", "ChainRulesCore", "CloseOpenIntervals", "DocStringExtensions", "ForwardDiff", "HostCPUFeatures", "IfElse", "LayoutPointers", "LinearAlgebra", "OffsetArrays", "PolyesterWeave", "SIMDDualNumbers", "SLEEFPirates", "SpecialFunctions", "Static", "ThreadingUtilities", "UnPack", "VectorizationBase"]
-git-tree-sha1 = "4e4f18eaeb9631442bb6745b1e21d0742944632f"
+git-tree-sha1 = "1d216376720ec00aec7ef4e9a357451262fed001"
 uuid = "bdcacae8-1622-11e9-2a5c-532679323890"
-version = "0.12.111"
+version = "0.12.113"
 
 [[deps.LoweredCodeUtils]]
 deps = ["JuliaInterpreter"]
@@ -1039,9 +1039,9 @@ version = "1.4.1"
 
 [[deps.OrdinaryDiffEq]]
 deps = ["Adapt", "ArrayInterface", "ArrayInterfaceGPUArrays", "ArrayInterfaceStaticArrays", "DataStructures", "DiffEqBase", "DocStringExtensions", "ExponentialUtilities", "FastClosures", "FiniteDiff", "ForwardDiff", "LinearAlgebra", "LinearSolve", "Logging", "LoopVectorization", "MacroTools", "MuladdMacro", "NLsolve", "NonlinearSolve", "Polyester", "PreallocationTools", "RecursiveArrayTools", "Reexport", "SciMLBase", "SparseArrays", "SparseDiffTools", "StaticArrays", "UnPack"]
-git-tree-sha1 = "d2f58ab523814b9c7f909855503a5a83241ab1e7"
+git-tree-sha1 = "8736f2b0fea5883e192b8aaf794516afcab579b3"
 uuid = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
-version = "6.13.0"
+version = "6.13.1"
 
 [[deps.PCRE_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Pkg"]
@@ -1304,9 +1304,9 @@ uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 
 [[deps.Setfield]]
 deps = ["ConstructionBase", "Future", "MacroTools", "Requires"]
-git-tree-sha1 = "38d88503f695eb0301479bc9b0d4320b378bafe5"
+git-tree-sha1 = "77172cadd2fdfa0c84c87e3a01215a4ca7723310"
 uuid = "efcf1570-3423-57d1-acb7-fd33fddbac46"
-version = "0.8.2"
+version = "1.0.0"
 
 [[deps.SharedArrays]]
 deps = ["Distributed", "Mmap", "Random", "Serialization"]
@@ -1339,9 +1339,9 @@ uuid = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
 
 [[deps.SparseDiffTools]]
 deps = ["Adapt", "ArrayInterfaceCore", "ArrayInterfaceStaticArrays", "Compat", "DataStructures", "FiniteDiff", "ForwardDiff", "Graphs", "LinearAlgebra", "Requires", "SparseArrays", "StaticArrays", "VertexSafeGraphs"]
-git-tree-sha1 = "56a100f020fa03ec49f4f9390e3886bd2a672647"
+git-tree-sha1 = "f71f06cce80d21e9b93933bc04b1334bb90259ab"
 uuid = "47a9eef4-7e08-11e9-0b38-333d64bd3804"
-version = "1.22.0"
+version = "1.23.0"
 
 [[deps.SpecialFunctions]]
 deps = ["ChainRulesCore", "IrrationalConstants", "LogExpFunctions", "OpenLibm_jll", "OpenSpecFun_jll"]
@@ -1431,11 +1431,13 @@ version = "5.2.1+0"
 deps = ["CSV", "Conda", "DataFrames", "Distances", "Distributions", "Downloads", "GibbsSeaWater", "GoogleDrive", "Interpolations", "LaTeXStrings", "LineSearches", "LinearAlgebra", "MAT", "NCDatasets", "NetCDF", "Optim", "Pkg", "Plots", "PyCall", "PyPlot", "Revise", "SparseArrays", "Statistics", "StatsBase"]
 path = "/home/gebbie/projects/TMI.jl"
 uuid = "582500f6-28c8-4d8f-aabe-b197735ec1d4"
-version = "0.1.16"
+version = "0.1.15"
 
 [[deps.TMItransient]]
 deps = ["DifferentialEquations", "Interpolations", "LinearAlgebra", "MAT", "NCDatasets", "NaNMath", "OrdinaryDiffEq", "PreallocationTools", "Revise", "TMI", "Test"]
-path = "/home/gebbie/projects/TMItransient"
+git-tree-sha1 = "af9ccad297dc0a2ee99d9d8b5d9986e378b4ed32"
+repo-rev = "vintages"
+repo-url = "https://github.com/ggebbie/TMItransient.jl"
 uuid = "ab8155c7-aa61-46aa-9e27-6244078cebd2"
 version = "0.1.1"
 
