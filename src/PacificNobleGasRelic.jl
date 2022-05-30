@@ -1,6 +1,6 @@
 module PacificNobleGasRelic
 
-using PyCall, PyPlot, DrWatson, TMI, TMItransient
+using PyCall, PyPlot, DrWatson, TMI, TMItransient, Interpolations
 
 export vintages_planview, vintages_section
 
@@ -26,8 +26,9 @@ function __init__()
 function planviewplotcartopy(c::Field{T}, depth, lims;titlelabel="section plot") where T <: Real
 
     cmap_seismic = get_cmap("seismic")
-    cmap_hot = get_cmap("hot_r")
-    cplan = planview(c::Field{T},depth)
+    #cmap_hot = get_cmap("hot_r")
+    cmap_hot = get_cmap("inferno_r")
+    cplan = planview(c,depth)
 
     fig = figure(202)
     clf()
@@ -76,8 +77,9 @@ function vintages_planview(params)
 
     local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
 
+    lims = vcat(collect(0:5:50),100)
     # Plan view plots
-    PacificNobleGasRelic.planviewplotcartopy(100g, depth, 0:5:50, titlelabel=tlabel)
+    PacificNobleGasRelic.planviewplotcartopy(100g, depth, lims, titlelabel=tlabel)
     mv(plotsdir("vintage.png"),plotsdir(froot),force=true)
 
 end
@@ -86,7 +88,7 @@ function vintages_section(params)
 
     @unpack vintage, lon, tinterval, longname = params 
 
-    lims = 0:5:50
+    lims = vcat(collect(0:5:50),100)
     # doing this every time, not so efficient
     Δ,τ = read_stepresponse()
 
@@ -100,12 +102,61 @@ function vintages_section(params)
 
     local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
 
-    sectionplot(g, lon, lims;titlelabel=tlabel) 
+    #println(size(g.tracer))
+    sectionplot(100g, lon, lims; titlelabel=tlabel) 
 
-    # Plan view plots
-    PacificNobleGasRelic.planviewplotcartopy(100g, depth, 0:5:50, titlelabel=tlabel)
     savefig(plotsdir(froot))
 
 end
+
+"""
+    function agedistribution
+
+    age distribution refers to distribution over lags, not space
+    sometimes called a transit time distribution
+"""
+function agedistribution(Δ,τΔ,loc)
+    Δ,τ = read_stepresponse()
+
+    # get weighted interpolation indices
+    wis1= Vector{Tuple{Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}}}(undef,2)
+    [wis[i] = interpindex(locs[i],Δ[1].γ) for i in 1]
+
+    Δloc = Vector(undef,length(Δ))
+    for tt in 1:length(Δ)
+        Δloc[tt] = observe(Δ[tt],wis,Δ[tt].γ)
+    end
+
+    g = Vector{Any}(undef,2)
+    for nn = 1:2
+        temp = Vector{Float64}(undef,length(Δloc))
+        for mm in 1:length(Δloc)
+            temp[mm] = Δloc[mm][nn]
+        end
+        tg, g[nn] = deltaresponse(tmp,τ)
+    end
+    
+    return nothing
+    
+end
+
+"""
+    function deltaresponse
+
+    Take CDF and turn it into PDF
+"""
+function deltaresponse(Δ,τΔ)
+
+    # hard coded annual resolution, easy because don't have to normalize
+    tgedge = 0:2000
+    tg = 0.5:2000
+
+    interp_linear = LinearInterpolation(τΔ, Δ)
+    Δhires = interp_linear(tgedge)
+    g = diff(Δhires)
+        
+    return tg, g
+end
+
 
 end
