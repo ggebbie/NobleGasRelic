@@ -67,15 +67,22 @@ function vintages_planview(params)
 
     # doing this every time, not so efficient
     Δ,τ = read_stepresponse()
+    local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
 
+    # get the meta-data correct on the output.
+    gvintage = Field(g.tracer,g.γ,vintage,longname[vintage],"seawater mass fraction []")
+    # save g to file if it hasn't been done before.
+    if isapprox(depth,2000) # kludge to not write twice
+        println("writing",depth,vintage)
+        writefield("vintages_TMI_4x4_2012.nc",gvintage)
+    end
+    
     froot = plotsdir(savename("TMI_4x4_2012",params,"png",accesses=["vintage","depth"]))
     println(froot)
 
     tlabel = "Vintage: "* longname[vintage] * " " * string(tinterval[vintage]) * " CE, depth="*string(depth)*"m"
     println(tlabel)
     #fname = "vintage_"*string(v)*"_"*string(depth)*"m.png"
-
-    local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
 
     lims = vcat(collect(0:5:50),100)
     # Plan view plots
@@ -91,7 +98,7 @@ function vintages_section(params)
     lims = vcat(collect(0:5:50),100)
     # doing this every time, not so efficient
     Δ,τ = read_stepresponse()
-
+    local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
     
     froot = plotsdir(savename("TMI_4x4_2012",params,"png",accesses=["vintage","lon"]))
     println(froot)
@@ -99,8 +106,6 @@ function vintages_section(params)
     tlabel = "Vintage: "* longname[vintage] * " " * string(tinterval[vintage]) * " CE, lon="*string(lon)*"E"
     println(tlabel)
     #fname = "vintage_"*string(v)*"_"*string(depth)*"m.png"
-
-    local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
 
     #println(size(g.tracer))
     sectionplot(100g, lon, lims; titlelabel=tlabel) 

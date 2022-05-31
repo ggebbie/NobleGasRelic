@@ -1,10 +1,10 @@
 using Revise, PacificNobleGasRelic, DrWatson
 
 tinterval = Dict(:MOD => (1860, 2022),
-                :LIA => (1350,1850),
+                :LIA => (1350,1860),
                 :MCA => (800, 1350),
                 :DACP => (400,800),
-                :DACP2 => (550,650),
+                #:DACP2 => (550,650),
                 :RWP => (1,550))
 
 longname = Dict(:MOD => "Modern Warming",
@@ -16,7 +16,7 @@ longname = Dict(:MOD => "Modern Warming",
 
 vintage = collect(keys(tinterval))
 depth = collect(2000:500:4000)
-lon = [162, 202]
+lon = [162, 208]
 
 params = @strdict vintage depth tinterval longname
 dicts = dict_list(params)

@@ -1428,16 +1428,14 @@ uuid = "fb77eaff-e24c-56d4-86b1-d163f2edb164"
 version = "5.2.1+0"
 
 [[deps.TMI]]
-deps = ["CSV", "Conda", "DataFrames", "Distances", "Distributions", "Downloads", "GibbsSeaWater", "GoogleDrive", "Interpolations", "LaTeXStrings", "LineSearches", "LinearAlgebra", "MAT", "NCDatasets", "NetCDF", "Optim", "Pkg", "Plots", "PyCall", "PyPlot", "Revise", "SparseArrays", "Statistics", "StatsBase"]
+deps = ["CSV", "Conda", "DataFrames", "DataStructures", "Distances", "Distributions", "Downloads", "GibbsSeaWater", "GoogleDrive", "Interpolations", "LaTeXStrings", "LineSearches", "LinearAlgebra", "MAT", "NCDatasets", "NetCDF", "Optim", "Pkg", "Plots", "PyCall", "PyPlot", "Revise", "SparseArrays", "Statistics", "StatsBase"]
 path = "/home/gebbie/projects/TMI.jl"
 uuid = "582500f6-28c8-4d8f-aabe-b197735ec1d4"
 version = "0.1.16"
 
 [[deps.TMItransient]]
 deps = ["DifferentialEquations", "Interpolations", "LinearAlgebra", "MAT", "NCDatasets", "NaNMath", "OrdinaryDiffEq", "PreallocationTools", "Revise", "TMI", "Test"]
-git-tree-sha1 = "af9ccad297dc0a2ee99d9d8b5d9986e378b4ed32"
-repo-rev = "vintages"
-repo-url = "https://github.com/ggebbie/TMItransient.jl"
+path = "/home/gebbie/projects/TMItransient/"
 uuid = "ab8155c7-aa61-46aa-9e27-6244078cebd2"
 version = "0.1.1"
 
