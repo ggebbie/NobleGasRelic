@@ -37,7 +37,7 @@ function planviewplotcartopy(c::Field{T}, depth, lims;titlelabel="section plot")
     proj = PacificNobleGasRelic.cartopy.crs.PlateCarree(central_longitude=cenlon)
     ax = fig.add_subplot(projection = proj)
     ax.set_global()
-    #ax.coastlines()
+    ax.coastlines()
 
     outdir = plotsdir()
     !isdir(outdir) && mkpath(outdir) 
