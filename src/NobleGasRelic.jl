@@ -1,4 +1,4 @@
-module PacificNobleGasRelic
+module NobleGasRelic
 
 using PyCall, PyPlot, DrWatson, TMI, TMItransient, Interpolations
 

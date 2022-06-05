@@ -1,4 +1,4 @@
-using Revise, PacificNobleGasRelic, DrWatson
+using Revise, NobleGasRelic, DrWatson
 
 tinterval = Dict(:MOD => (1860, 2022),
                 :LIA => (1350,1860),
