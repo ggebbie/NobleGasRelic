@@ -33,12 +33,13 @@ function planviewplotcartopy(c::Field{T}, depth, lims;titlelabel="section plot")
     fig = figure(202)
     clf()
     cenlon = -160.0
-    proj0 = PacificNobleGasRelic.cartopy.crs.PlateCarree()
-    proj = PacificNobleGasRelic.cartopy.crs.PlateCarree(central_longitude=cenlon)
+    proj0 = cartopy.crs.PlateCarree()
+    proj = cartopy.crs.PlateCarree(central_longitude=cenlon)
     ax = fig.add_subplot(projection = proj)
     ax.set_global()
-    ax.coastlines()
-
+    #ax.coastlines()
+    ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor="black", facecolor="black")
+    
     outdir = plotsdir()
     !isdir(outdir) && mkpath(outdir) 
     outfname = plotsdir("vintage.png")
@@ -66,6 +67,7 @@ function vintages_planview(params)
     @unpack vintage, depth, tinterval, longname = params 
 
     # doing this every time, not so efficient
+    
     Δ,τ = read_stepresponse()
     local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
 
@@ -74,19 +76,20 @@ function vintages_planview(params)
     # save g to file if it hasn't been done before.
     if isapprox(depth,2000) # kludge to not write twice
         println("writing",depth,vintage)
-        writefield("vintages_TMI_4x4_2012.nc",gvintage)
+        !isdir(DrWatson.datadir()) && mkdir(DrWatson.datadir())
+        writefield(DrWatson.datadir("vintages_TMI_4x4_2012.nc"),gvintage)
     end
     
     froot = plotsdir(savename("TMI_4x4_2012",params,"png",accesses=["vintage","depth"]))
     println(froot)
 
-    tlabel = "Vintage: "* longname[vintage] * " " * string(tinterval[vintage]) * " CE, depth="*string(depth)*"m"
+    tlabel = "Vintage: "* longname[vintage] * ", depth="*string(depth)*"m"
     println(tlabel)
     #fname = "vintage_"*string(v)*"_"*string(depth)*"m.png"
 
     lims = vcat(collect(0:5:50),100)
     # Plan view plots
-    PacificNobleGasRelic.planviewplotcartopy(100g, depth, lims, titlelabel=tlabel)
+    planviewplotcartopy(100g, depth, lims, titlelabel=tlabel)
     mv(plotsdir("vintage.png"),plotsdir(froot),force=true)
 
 end

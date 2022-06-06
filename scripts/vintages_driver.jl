@@ -5,20 +5,21 @@ tinterval = Dict(:MOD => (1860, 2022),
                 :MCA => (800, 1350),
                 :DACP => (400,800),
                 #:DACP2 => (550,650),
-                :RWP => (-250,400))
+                 :RWP => (-250,400),
+                 :preRWP => (-Inf,-250))
 
 longname = Dict(:MOD => "Modern Warming",
                 :LIA => "Little Ice Age",
                 :MCA => "Medieval Climate Anomaly",
                 :DACP => "Dark Ages Cold Period",
                 #:DACP2 => "Dark Ages Cold Period (strict)",
-                :RWP => "Roman Warm Period")
+                :RWP => "Roman Warm Period",
+                :preRWP => "Pre-Roman Warm Period")
 
 # add dates to longname
 for (kk,vv) in longname
     longname[kk] *= (" "*string(tinterval[kk])*" CE")
 end
-
 
 vintage = collect(keys(tinterval))
 depth = collect(2000:500:4000)
