@@ -2,7 +2,7 @@ module NobleGasRelic
 
 using PyCall, PyPlot, DrWatson, TMI, TMItransient, Interpolations
 
-export vintages_planview, vintages_section
+export vintages_planview, vintages_section, agedistribution, taudeltaresponse
 
 const mpl = PyNULL()
 const plt = PyNULL()
@@ -106,7 +106,7 @@ function vintages_section(params)
     froot = plotsdir(savename("TMI_4x4_2012",params,"png",accesses=["vintage","lon"]))
     println(froot)
 
-    tlabel = "Vintage: "* longname[vintage] * " " * string(tinterval[vintage]) * " CE, lon="*string(lon)*"E"
+    tlabel = "Vintage: "* longname[vintage] * ", lon="*string(lon)*"E"
     println(tlabel)
     #fname = "vintage_"*string(v)*"_"*string(depth)*"m.png"
 
@@ -123,28 +123,24 @@ end
     age distribution refers to distribution over lags, not space
     sometimes called a transit time distribution
 """
-function agedistribution(Δ,τΔ,loc)
+function agedistribution(loc)
+
     Δ,τ = read_stepresponse()
+    ncdf = length(τ)
+    npdf = ncdf - 1
 
     # get weighted interpolation indices
-    wis1= Vector{Tuple{Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}}}(undef,2)
-    [wis[i] = interpindex(locs[i],Δ[1].γ) for i in 1]
-
-    Δloc = Vector(undef,length(Δ))
-    for tt in 1:length(Δ)
-        Δloc[tt] = observe(Δ[tt],wis,Δ[tt].γ)
-    end
-
-    g = Vector{Any}(undef,2)
-    for nn = 1:2
-        temp = Vector{Float64}(undef,length(Δloc))
-        for mm in 1:length(Δloc)
-            temp[mm] = Δloc[mm][nn]
-        end
-        tg, g[nn] = deltaresponse(tmp,τ)
-    end
+    wis= Vector{Tuple{Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}}}(undef,1)
+    #[wis[xx] = interpindex(loc[xx],Δ[xx].γ) for xx in 1]
+    wis[1] = interpindex(loc,Δ[1].γ)
     
-    return nothing
+    Δloc = Vector{Float64}(undef,ncdf)
+    for tt in 1:ncdf
+        Δloc[tt] = observe(Δ[tt],wis,Δ[tt].γ)[1] # kludge to convert to scalar
+    end
+    tg, g = deltaresponse(Δloc,τ)
+    
+    return g
     
 end
 
@@ -156,14 +152,31 @@ end
 function deltaresponse(Δ,τΔ)
 
     # hard coded annual resolution, easy because don't have to normalize
-    tgedge = 0:2000
-    tg = 0.5:2000
+    τmax = maximum(τΔ)
+    tgedge = 0:floor(τmax)
+    tg = 0.5:floor(τmax)
 
     interp_linear = LinearInterpolation(τΔ, Δ)
     Δhires = interp_linear(tgedge)
     g = diff(Δhires)
         
     return tg, g
+end
+
+"""
+    function taudeltaresponse
+
+    Take CDF and turn it into PDF, get lag timescale
+"""
+function taudeltaresponse()
+
+    Δ,τ = read_stepresponse()
+
+    # hard coded annual resolution, easy because don't have to normalize
+    τmax = maximum(τ)
+    tgedge = 0:floor(τmax)
+    tg = 0.5:floor(τmax)
+    return tg
 end
 
 

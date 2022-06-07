@@ -23,7 +23,9 @@ end
 
 vintage = collect(keys(tinterval))
 depth = collect(2000:500:4000)
-lon = [162, 208]
+
+# lon must match grid exactly or else "dropped dims" error
+lon = [162, 210]
 
 params = @strdict vintage depth tinterval longname
 dicts = dict_list(params)
@@ -38,37 +40,22 @@ dicts = dict_list(params)
 
 map(vintages_section,dicts)
 
-# get some TTDs so that we can take difference of TTDs
-#locs = Vector{Tuple}(undef,2)
-loc1 = (360-152,35,3500)
-loc2 = (360-152,-20,3500)
+# get 2 age distributions (TTDs), ultimately we have info about their difference
+n = 2
+loc = Vector{Tuple}(undef,n)
+loc[1] = (360-152,35,3500) # North Pacific
+loc[2] = (360-152,-20,3500) # South Pacific
 
-wis1= Vector{Tuple{Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}}}(undef,1)
-[wis1[i] = interpindex(loc1,Δ[1].γ) for i in 1]
-
-wis2= Vector{Tuple{Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}}}(undef,1)
-[wis2[i] = interpindex(loc2,Δ[1].γ) for i in 1]
-
-Δloc1 = Vector{Float64}(undef,length(Δ))
-for tt in 1:length(Δ)
-    Δloc1[tt] = observe(Δ[tt],wis1,Δ[tt].γ)[1]
-end
-
-Δloc2 = Vector{Float64}(undef,length(Δ))
-for tt in 1:length(Δ)
-    Δloc2[tt] = observe(Δ[tt],wis2,Δ[tt].γ)[1]
-end
-
-
-tg1,g1 = PacificNobleGasRelic.deltaresponse(Δloc1,τ)
-tg2,g2 = PacificNobleGasRelic.deltaresponse(Δloc2,τ)
+# get age distribution
+g = agedistribution.(loc)
+tg = taudeltaresponse()
 
 figure(2)
 clf()
-line1, = plot(tg1,g1,"black",label="35°N, 152°W, 3.5 km")
-line2, = plot(tg2,g2,"red",label="20°S, 152°W, 3.5 km")
-line3, = plot(tg1,g1-g2,"green",label="Δ")
-grid("true")
+line1, = plot(tg,g[1],"black",label="35°N, 152°W, 3.5 km")
+line2, = plot(tg,g[2],"red",label="20°S, 152°W, 3.5 km")
+line3, = plot(tg,g[1]-g[2],"green",label="Δ")
+PyPlot.grid("true")
 xlabel("Lag, τ [yr]")
 ylabel("mass fraction per yr [1/yr]")
 legend()
