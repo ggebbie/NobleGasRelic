@@ -156,8 +156,11 @@ function deltaresponse(Δ,τΔ)
     tgedge = 0:floor(τmax)
     tg = 0.5:floor(τmax)
 
-    interp_linear = LinearInterpolation(τΔ, Δ)
-    Δhires = interp_linear(tgedge)
+    #    interp_linear = LinearInterpolation(τΔ, Δ)
+    # Δhires = interp_linear(tgedge)
+
+    itp = interpolate(τΔ, Δ, FritschCarlsonMonotonicInterpolation())
+    Δhires = itp.(tgedge)
     g = diff(Δhires)
         
     return tg, g
