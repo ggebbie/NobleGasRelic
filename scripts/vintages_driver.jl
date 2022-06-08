@@ -1,4 +1,4 @@
-using Revise, NobleGasRelic, DrWatson, PyPlot, LinearAlgebra, Plots
+using Revise, NobleGasRelic, DrWatson, PyPlot, LinearAlgebra
 
 tinterval = Dict(:MOD => (1860, 2022),
                 :LIA => (1350,1860),
@@ -95,7 +95,7 @@ Cₓₓ = Diagonal(σₓ.^2) + Clong
 # Gauss-Markov solution method
 Eᵀ = Δg
 E = transpose(Eᵀ)
-σy = 0 # assume ΔNe has error of 1 mbar
+σy = 0.2 # assume ΔNe has error of 0.2 mbar (Jenkins pers.comm.)
 x̃ = Cₓₓ*Eᵀ*((E*Cₓₓ*Eᵀ + σy^2)\ΔNe)
 
 # reduction in uncertainty

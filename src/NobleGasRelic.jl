@@ -22,7 +22,6 @@ function __init__()
     println("Python libraries installed")
  end
 
-
 function planviewplotcartopy(c::Field{T}, depth, lims;titlelabel="section plot") where T <: Real
 
     cmap_seismic = get_cmap("seismic")
@@ -181,6 +180,5 @@ function taudeltaresponse()
     tg = 0.5:floor(τmax)
     return tg
 end
-
 
 end
