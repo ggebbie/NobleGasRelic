@@ -1,4 +1,4 @@
-using Revise, NobleGasRelic, DrWatson, PyPlot
+using Revise, NobleGasRelic, DrWatson, PyPlot, LinearAlgebra, Plots
 
 tinterval = Dict(:MOD => (1860, 2022),
                 :LIA => (1350,1860),
@@ -50,12 +50,14 @@ loc[2] = (360-152,-20,3500) # South Pacific
 g = agedistribution.(loc)
 tg = taudeltaresponse()
 
+Δg = g[1] - g[2]
+
 # PyPlot version, not currently showing
 figure(2)
 clf()
 line1, = PyPlot.plot(tg,g[1],"black",label="35°N, 152°W, 3.5 km")
 line2, = PyPlot.plot(tg,g[2],"red",label="20°S, 152°W, 3.5 km")
-line3, = PyPlot.plot(tg,g[1]-g[2],"green",label="Δ")
+line3, = PyPlot.plot(tg,Δg,"green",label="Δ")
 grid("true")
 xlabel("Lag, τ [yr]")
 ylabel("mass fraction per yr [1/yr]")
@@ -69,25 +71,93 @@ Plots.plot!(tg,g[1]-g[2],color=:green,label="Δ")
 plot!(xlabel="Lag, τ [yr]",ylabel="mass fraction per yr [1/yr]")
 Plots.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
 
-# smallest climate signal to give a value of 1.
+# minimum-energy surface timeseries
 #G*θ = 1
-G = g1 - g2
-
 #J = (G*θ) ̇ (G*θ
+F = svd(transpose(Δg),full=true)
+ΔNe = 3.5 # mbar
 
-tmp = (transpose(G)*G)\1
-θ̃ = G*tmp
+# particular solution 
+xₚ = F.Vt[1,:]*((F.U'*ΔNe)/F.S[1])
+tₚ = 2022 .- tg
+#tmp = (transpose(G)*G)\1
+#θ̃ = G*tmp
 # J
+#θ1 = dot(g1,θ̃)
+#θ2 = dot(g2,θ̃)
 
-θ1 = dot(g1,θ̃)
-θ2 = dot(g2,θ̃)
-
-figure(13)
+PyPlot.figure(130)
 #plot(tg1,θ1,"black",label="35°N, 152°W, 3.5 km")
 #plot(tg2,θ2,"red",label="20°S, 152°W, 3.5 km")
-plot(θ̃,"green",label="minimal surface signal to produce: NPAC-SPAC=1")
+PyPlot.plot(tₚ,xₚ,"green",label="minimum-energy surface signal")
 grid("true")
 xlabel("Lag, τ [yr]")
 ylabel("signal []")
 legend()
 savefig(plotsdir("minimalsurfacesignal.png"))
+
+# try with Plots instead
+Plots.plot(tₚ,xₚ,color=:green,label="minimum-energy surface signal")
+plot!(xlabel="Calendar Year [CE]",ylabel="sea level pressure [mbar]",legend=:bottomleft)
+Plots.savefig(plotsdir("minimalsurfacesignal.png"))
+
+# max, min surface signal
+tmax = tₚ[findmax(xₚ)[2]]
+tmin = tₚ[findmin(xₚ)[2]]
+
+# make diagnostic: size of Δ between max min, assuming timing doesn't change
+
+imax = findall(x -> tmax - 100 ≤ x ≤ tmax + 100, tₚ)
+imin = findall(x -> tmin - 100 ≤ x ≤ tmin + 100, tₚ)
+
+# Magnitude diagnostic
+M = zeros(1,length(tₚ))
+M[imax] .= 1/length(imax)
+M[imin] .= -1/length(imax)
+
+Mdacp = zeros(1,length(tₚ))
+Mdacp[imax] .= 1/length(imax)
+
+mag = M*xₚ
+
+# what if all of imax has null space projection of 20?
+σ = 20
+x = xₚ
+for nn in imax
+    global x += σ .* F.Vt[nn+1,:]
+end
+
+# make LIA more negative
+σ = 20
+x = xₚ
+for nn in imin
+    global x -= σ .* F.Vt[nn+1,:]
+end
+
+
+# one random realization is enough for plotting
+# assume that annual variations can be 20 mbar
+σ = 20
+x = xₚ
+for nn = 1:length(tₚ)-1
+    global x += σ * rand().*F.Vt[nn+1,:]
+end
+#end
+
+# minimal surface signal with other solutions
+Plots.plot(tₚ,x .- Mdacp*x,color=:grey,label="higher-energy surface signal")
+Plots.plot!(tₚ,xₚ .- Mdacp*xₚ,color=:red,label="minimum-energy surface signal")
+plot!(xlabel="Calendar Year [CE]",ylabel="sea level pressure relative to DACP [mbar]",legend=:bottomleft)
+Plots.savefig(plotsdir("surfacesignals.png"))
+
+# get a range of possible DACP to LIA variations
+# nreal = 10000
+# mag = Vector{Float64}(undef,nreal)
+# for nn = 1:nreal
+#     σ = 20
+#     x = xₚ
+#     for nn = 1:length(tₚ)-1
+#         x += σ * rand().*F.Vt[nn+1,:]
+#     end
+#     mag[nn] = (M*x)[1]
+# end
