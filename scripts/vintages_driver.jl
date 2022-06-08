@@ -74,11 +74,28 @@ Plots.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
 # underdetermined Gauss-Markov solution
 #tmp =
 tₚ = 2022 .- tg
+
+# prior statistics of solution
+σₓ = 5 *ones(length(tₚ))   # assume 20 mbar year-to-year variations
+
+σcentury = 20;
+
+# permit centennial-scale correlation in SLP
+nt = length(tₚ)
+Clong = Matrix{Float64}(undef,nt,nt)
+T = 500 # timescale of correlation
+for xx = 1:nt
+    for yy = 1:nt
+        Clong[xx,yy] = σcentury^2 * exp(-(tₚ[xx]-tₚ[yy])^2/T^2)
+    end
+end
+
+Cₓₓ = Diagonal(σₓ.^2) + Clong
+
+# Gauss-Markov solution method
 Eᵀ = Δg
 E = transpose(Eᵀ)
-σₓ = 20 *ones(length(tₚ))   # assume 20 mbar year-to-year variations
-σy = 0.5 # assume ΔNe has error of 1 mbar
-Cₓₓ = Diagonal(σₓ.^2)
+σy = 0 # assume ΔNe has error of 1 mbar
 x̃ = Cₓₓ*Eᵀ*((E*Cₓₓ*Eᵀ + σy^2)\ΔNe)
 
 # reduction in uncertainty
@@ -86,13 +103,54 @@ P⁻ = Cₓₓ*Eᵀ*((E*Cₓₓ*Eᵀ + σy^2)\(E*Cₓₓ))
 P  = Cₓₓ - P⁻
 
 # what is uncertainty of DACP to LIA change
+ΔDACPtoLIA = M*x̃
 σDACPtoLIA = √(M*P*transpose(M))
 σDACP = √(Mdacp*P*transpose(Mdacp))
 
+# plot with reference to modern
+imod = findall(x -> x ≥ 1979,tₚ)
+ilia = findall(x -> tinterval[:LIA][1] ≤ x ≤ tinterval[:LIA][2],tₚ)
+    
+nt = length(tₚ)
+Mmod = Matrix{Float64}(undef,nt,nt)
+Mlia = Matrix{Float64}(undef,nt,nt)
+# for each row, subtract modern value
+for rr = 1:length(tₚ)
+    Mmod[rr,rr] = 1
+    Mmod[rr,imod] .-= 1 ./ length(imod)
+    Mlia[rr,rr] = 1
+    Mlia[rr,ilia] .-= 1 ./ length(ilia)
+end
+
+
+# get error bars
+Pmod = Mmod*(P*transpose(Mmod))
+σPmod = .√(diag(Pmod))
+
+Plia = Mlia*(P*transpose(Mlia))
+σPlia = .√(diag(Plia))
+
 # try with Plots instead
-Plots.plot(tₚ,x̃,color=:green,label="Gauss-Markov surface signal")
-plot!(xlabel="Calendar Year [CE]",ylabel="sea level pressure [mbar]",legend=:bottomleft)
-Plots.savefig(plotsdir("minimalsurfacesignal.png"))
+Plots.plot(tₚ,Mlia*x̃,color=:black,label="Gauß-Markov surface signal")
+Plots.plot!(tₚ,Mlia*x̃ .+ σPlia,color=:grey,label="+1σ")
+Plots.plot!(tₚ,Mlia*x̃ .- σPlia,color=:grey,label="-1σ")
+plot!(xlabel="Calendar Year [CE]",ylabel="SLP - SLP(LIA)  [mbar]",legend=:bottomleft)
+Plots.savefig(plotsdir("surfacesignal_gaussmarkov_errors.png"))
+
+# try with PyPlot 
+# Plots.plot(tₚ,Mlia*x̃,color=:green,label="Gauß-Markov surface signal")
+# plot!(xlabel="Calendar Year [CE]",ylabel="SLP - SLP(LIA)  [mbar]",legend=:bottomleft)
+# PyPlot.figure(130)
+#plot(tg1,θ1,"black",label="35°N, 152°W, 3.5 km")
+#plot(tg2,θ2,"red",label="20°S, 152°W, 3.5 km")
+PyPlot.plot(tₚ,Mlia*x̃,"green",label="surface signal")
+figure()
+PyPlot.errorbar(tₚ,Mlia*x̃,yerr=σPlia)
+grid("true")
+xlabel("Lag, τ [yr]")
+ylabel("signal []")
+legend()
+savefig(plotsdir("minimalsurfacesignal.png"))
 
 # minimum-energy surface timeseries
 
