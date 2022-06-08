@@ -71,20 +71,43 @@ Plots.plot!(tg,g[1]-g[2],color=:green,label="Δ")
 plot!(xlabel="Lag, τ [yr]",ylabel="mass fraction per yr [1/yr]")
 Plots.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
 
+# underdetermined Gauss-Markov solution
+#tmp =
+tₚ = 2022 .- tg
+Eᵀ = Δg
+E = transpose(Eᵀ)
+σₓ = 20 *ones(length(tₚ))   # assume 20 mbar year-to-year variations
+σy = 0.5 # assume ΔNe has error of 1 mbar
+Cₓₓ = Diagonal(σₓ.^2)
+x̃ = Cₓₓ*Eᵀ*((E*Cₓₓ*Eᵀ + σy^2)\ΔNe)
+
+# reduction in uncertainty
+P⁻ = Cₓₓ*Eᵀ*((E*Cₓₓ*Eᵀ + σy^2)\(E*Cₓₓ))
+P  = Cₓₓ - P⁻
+
+# what is uncertainty of DACP to LIA change
+σDACPtoLIA = √(M*P*transpose(M))
+σDACP = √(Mdacp*P*transpose(Mdacp))
+
+# try with Plots instead
+Plots.plot(tₚ,x̃,color=:green,label="Gauss-Markov surface signal")
+plot!(xlabel="Calendar Year [CE]",ylabel="sea level pressure [mbar]",legend=:bottomleft)
+Plots.savefig(plotsdir("minimalsurfacesignal.png"))
+
 # minimum-energy surface timeseries
+
 #G*θ = 1
 #J = (G*θ) ̇ (G*θ
 F = svd(transpose(Δg),full=true)
 ΔNe = 3.5 # mbar
 
-# particular solution 
-xₚ = F.Vt[1,:]*((F.U'*ΔNe)/F.S[1])
-tₚ = 2022 .- tg
-#tmp = (transpose(G)*G)\1
-#θ̃ = G*tmp
 # J
 #θ1 = dot(g1,θ̃)
 #θ2 = dot(g2,θ̃)
+
+
+# particular solution 
+xₚ = F.Vt[1,:]*((F.U'*ΔNe)/F.S[1])
 
 PyPlot.figure(130)
 #plot(tg1,θ1,"black",label="35°N, 152°W, 3.5 km")
