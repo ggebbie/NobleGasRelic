@@ -68,7 +68,7 @@ function vintages_planview(params)
     # doing this every time, not so efficient
     
     Δ,τ = read_stepresponse()
-    local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
+    g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ,interp="spline")
 
     # get the meta-data correct on the output.
     gvintage = Field(g.tracer,g.γ,vintage,longname[vintage],"seawater mass fraction []")
