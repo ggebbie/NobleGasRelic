@@ -65,11 +65,11 @@ legend()
 PyPlot.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
 
 # try to use Plots 
-Plots.plot(tg,g[1],color=:black,label="35°N, 152°W, 3.5 km")
-Plots.plot!(tg,g[2],color=:red,label="20°S, 152°W, 3.5 km")
-Plots.plot!(tg,g[1]-g[2],color=:green,label="Δ")
-plot!(xlabel="Lag, τ [yr]",ylabel="mass fraction per yr [1/yr]")
-Plots.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
+# Plots.plot(tg,g[1],color=:black,label="35°N, 152°W, 3.5 km")
+# Plots.plot!(tg,g[2],color=:red,label="20°S, 152°W, 3.5 km")
+# Plots.plot!(tg,g[1]-g[2],color=:green,label="Δ")
+# plot!(xlabel="Lag, τ [yr]",ylabel="mass fraction per yr [1/yr]")
+# Plots.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
 
 # underdetermined Gauss-Markov solution
 #tmp =
