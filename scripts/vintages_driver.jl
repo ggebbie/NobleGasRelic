@@ -45,62 +45,70 @@ n = 2
 loc = Vector{Tuple}(undef,n)
 loc[1] = (360-152,35,3500) # North Pacific
 loc[2] = (360-152,-20,3500) # South Pacific
+compare_deltaresponses(loc)
 
-# get age distribution
-g = agedistribution.(loc)
-tg = taudeltaresponse()
 
-Δg = g[1] - g[2]
 
-# PyPlot version, not currently showing
-figure(2)
-clf()
-line1, = PyPlot.plot(tg,g[1],"black",label="35°N, 152°W, 3.5 km")
-line2, = PyPlot.plot(tg,g[2],"red",label="20°S, 152°W, 3.5 km")
-line3, = PyPlot.plot(tg,Δg,"green",label="Δ")
-grid("true")
-xlabel("Lag, τ [yr]")
-ylabel("mass fraction per yr [1/yr]")
-legend()
-PyPlot.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
+#Thomas R. Knutson, Jeffrey Ploshay. Journal of Climate. DOI: 10.1175/JCLI-D-19-0997.1: 2 mbar/century trends in CMIP5
+#https://en.wikipedia.org/wiki/North_Atlantic_oscillation#/media/File:Winter-NAO-Index.svg: Annual change about 2 mbar/yr
+# Wunsch 1999 \Psi(s) =  0.66s−0.22 mb 2/cycle/yr,
+# power law = 0.2, wunsch 1990
 
-# try to use Plots 
-# Plots.plot(tg,g[1],color=:black,label="35°N, 152°W, 3.5 km")
-# Plots.plot!(tg,g[2],color=:red,label="20°S, 152°W, 3.5 km")
-# Plots.plot!(tg,g[1]-g[2],color=:green,label="Δ")
-# plot!(xlabel="Lag, τ [yr]",ylabel="mass fraction per yr [1/yr]")
-# Plots.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
+# what is 1000 year expected variation?
+Φ1000 = 0.66*(1/1000)^(-0.22)
+Φ1 = 0.66*1^(-0.22)
+A1000 = √(Φ1000/2)
+A1 = √(Φ1/2)
 
 # underdetermined Gauss-Markov solution
-#tmp =
 tₚ = 2022 .- tg
 
+σcentury = 10
+Tlong = 500
+
 # prior statistics of solution
-σₓ = 5 *ones(length(tₚ))   # assume 20 mbar year-to-year variations
+σₓ = 1  # assume 5 mbar year-to-year variations
 
-σcentury = 20;
+Cₓₓ = priorcovariance(tₚ,σₓ,σcentury,Tlong)
 
-# permit centennial-scale correlation in SLP
-nt = length(tₚ)
-Clong = Matrix{Float64}(undef,nt,nt)
-T = 500 # timescale of correlation
-for xx = 1:nt
-    for yy = 1:nt
-        Clong[xx,yy] = σcentury^2 * exp(-(tₚ[xx]-tₚ[yy])^2/T^2)
+ΔNe = 3.5 # mbar
+σΔNe = 0.2 # assume ΔNe has error of 0.2 mbar (Jenkins pers.comm.)
+
+x̃,P = gaussmarkovsolution(Δg,ΔNe,σΔNe,Cₓₓ)
+
+F = trendmatrix(tₚ[end],tₚ[begin],tₚ)
+trend,σtrend = NobleGasRelic.propagate(F,x̃,P)
+
+# try various time intervals to compute trends
+Tlist = 1800:200:2000
+
+for T in Tlist
+
+    ntrend = findall(x -> x == tₚ[end] + T, tₚ)
+    ntrend = ntrend[1]
+    trend = zeros(ntrend)
+    σtrend = zeros(ntrend)
+    ttrend = zeros(ntrend)
+
+    for tt = 1:ntrend
+        println(tt)
+        F = trendmatrix(tₚ[end+1-tt],tₚ[end+1-tt-T],tₚ)
+        trend[tt],σtrend[tt] = propagate(F,x̃,P)
+        ttrend[tt] = (tₚ[end+1-tt] + tₚ[end+1-tt-T])/2
     end
+
+    # try with PlotlyJS instead
+    plotlyjs()
+    Plots.plot(ttrend,T*trend,color=:black)
+    Plots.plot!(ttrend,T*trend,ribbon=T*σtrend,color=:grey)
+    Plots.plot!(xlabel="Calendar Year [CE]",ylabel=string(T)*"-yr Δ(SLP) [mbar]",legend=false)
+    plotname = "SLPtrends_"*string(T)*"yr"
+    Plots.savefig(plotsdir(plotname*".svg"))
+    Plots.savefig(plotsdir(plotname*".pdf"))
 end
 
-Cₓₓ = Diagonal(σₓ.^2) + Clong
-
-# Gauss-Markov solution method
-Eᵀ = Δg
-E = transpose(Eᵀ)
-σy = 0.2 # assume ΔNe has error of 0.2 mbar (Jenkins pers.comm.)
-x̃ = Cₓₓ*Eᵀ*((E*Cₓₓ*Eᵀ + σy^2)\ΔNe)
-
-# reduction in uncertainty
-P⁻ = Cₓₓ*Eᵀ*((E*Cₓₓ*Eᵀ + σy^2)\(E*Cₓₓ))
-P  = Cₓₓ - P⁻
+Mmod = averagematrix(1860,2022,tₚ)
+Mlia = averagematrix(1860,2022,tₚ)
 
 # what is uncertainty of DACP to LIA change
 ΔDACPtoLIA = M*x̃
@@ -108,19 +116,18 @@ P  = Cₓₓ - P⁻
 σDACP = √(Mdacp*P*transpose(Mdacp))
 
 # plot with reference to modern
-imod = findall(x -> x ≥ 1979,tₚ)
-ilia = findall(x -> tinterval[:LIA][1] ≤ x ≤ tinterval[:LIA][2],tₚ)
-    
-nt = length(tₚ)
-Mmod = Matrix{Float64}(undef,nt,nt)
-Mlia = Matrix{Float64}(undef,nt,nt)
-# for each row, subtract modern value
-for rr = 1:length(tₚ)
-    Mmod[rr,rr] = 1
-    Mmod[rr,imod] .-= 1 ./ length(imod)
-    Mlia[rr,rr] = 1
-    Mlia[rr,ilia] .-= 1 ./ length(ilia)
-end
+#imod = findall(x -> x ≥ 1979,tₚ)
+#ilia = findall(x -> tinterval[:LIA][1] ≤ x ≤ tinterval[:LIA][2],tₚ)
+# nt = length(tₚ)
+# Mmod = Matrix{Float64}(undef,nt,nt)
+# Mlia = Matrix{Float64}(undef,nt,nt)
+# # for each row, subtract modern value
+# for rr = 1:length(tₚ)
+#     Mmod[rr,rr] = 1
+#     Mmod[rr,imod] .-= 1 ./ length(imod)
+#     Mlia[rr,rr] = 1
+#     Mlia[rr,ilia] .-= 1 ./ length(ilia)
+# end
 
 
 # get error bars
@@ -182,24 +189,23 @@ Plots.plot(tₚ,xₚ,color=:green,label="minimum-energy surface signal")
 plot!(xlabel="Calendar Year [CE]",ylabel="sea level pressure [mbar]",legend=:bottomleft)
 Plots.savefig(plotsdir("minimalsurfacesignal.png"))
 
-# max, min surface signal
-tmax = tₚ[findmax(xₚ)[2]]
-tmin = tₚ[findmin(xₚ)[2]]
-
 # make diagnostic: size of Δ between max min, assuming timing doesn't change
-
-imax = findall(x -> tmax - 100 ≤ x ≤ tmax + 100, tₚ)
-imin = findall(x -> tmin - 100 ≤ x ≤ tmin + 100, tₚ)
-
 # Magnitude diagnostic
-M = zeros(1,length(tₚ))
-M[imax] .= 1/length(imax)
-M[imin] .= -1/length(imax)
+# max, min surface signal
+#tmax = tₚ[findmax(xₚ)[2]]
+#tmin = tₚ[findmin(xₚ)[2]]
+# make diagnostic: size of Δ between max min, assuming timing doesn't change
+# Magnitude diagnostic
+#imax = findall(x -> tmax - 100 ≤ x ≤ tmax + 100, tₚ)
+#imin = findall(x -> tmin - 100 ≤ x ≤ tmin + 100, tₚ)
+# M = zeros(1,length(tₚ))
+# M[imax] .= 1/length(imax)
+# M[imin] .= -1/length(imax)
 
-Mdacp = zeros(1,length(tₚ))
-Mdacp[imax] .= 1/length(imax)
+# Mdacp = zeros(1,length(tₚ))
+# Mdacp[imax] .= 1/length(imax)
 
-mag = M*xₚ
+mag = magnitude(xₚ,tₚ)
 
 # what if all of imax has null space projection of 20?
 σ = 20
