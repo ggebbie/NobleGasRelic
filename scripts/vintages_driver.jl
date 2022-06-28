@@ -1,4 +1,5 @@
 using Revise, NobleGasRelic, DrWatson, PyPlot, LinearAlgebra
+using TMI, DataFrames, Interpolations, PlotlyJS, Plots
 
 tinterval = Dict(:MOD => (1860, 2022),
                 :LIA => (1350,1860),
@@ -85,6 +86,74 @@ for vv in vintage
     #!isdir(datadir("csv")) && mkdir(datadir("csv"))
 
 end
+
+names(df)
+
+E = Matrix(df)[:,5:10]
+ΔE = transpose(E[1,:]-E[2,:])/100
+
+# find time difference between vintages
+t̄ = Dict{Symbol,Float64}()
+for vv in vintage
+    t̄[vv] =  (tinterval[vv][1] + tinterval[vv][2])/2
+end
+t̄[:preRWP] = 1000.0  # instead of Inf
+
+# make a covariance matrix that penalizes differences
+# greater than 1 mbar/century
+
+# make a covariance matrix
+nv = length(vintage)
+#D = Matrix{Float64}(undef,nv,nv)
+S⁻ = zeros(Float64,nv,nv)
+for (mm,ii) in enumerate(vintage)
+    for (nn,jj) in enumerate(vintage)
+        if ii != jj
+            Δt = abs(t̄[ii] - t̄[jj])
+            δ = zeros(nv)
+            δ[mm] = 1.0
+            δ[nn] = -1.0
+            global S⁻ += 1/(Δt/100)^2 * (δ * transpose(δ))
+        end
+    end
+
+    # add constraint that MOD equals zero (Reference)
+    if ii == :MOD
+        S⁻[mm,mm] = 1/(0.1^2) # within 0.1
+    end
+    
+end
+
+# Solve it. 
+W⁻ = 1/(0.1^2)
+y = 3.5
+xtmp = (transpose(ΔE)*W⁻*ΔE + S⁻) \ (transpose(ΔE)*W⁻*y)
+ñ = ΔE*xtmp - y
+
+x̃ = Dict{Symbol,Float64}()
+for (mm,ii) in enumerate(vintage)
+    x̃[ii] = xtmp[mm]
+end
+
+
+
+# try with PlotlyJS instead
+plotlyjs(markershape=:auto)
+for vv in vintage
+    println(t̄[vv])
+    println(x̃[vv])
+    Plots.plot!((t̄[vv],x̃[vv]))
+end
+plotname = "sixvintages"
+Plots.savefig(plotsdir(plotname*".svg"))
+
+
+
+Plots.plot!(ttrend,T*trend,ribbon=T*σtrend,color=:grey)
+Plots.plot!(xlabel="Calendar Year [CE]",ylabel=string(T)*"-yr Δ(SLP) [mbar]",legend=false)
+plotname = "SLPtrends_"*string(T)*"yr"
+Plots.savefig(plotsdir(plotname*".svg"))
+Plots.savefig(plotsdir(plotname*".pdf"))
 
 CSV.write(datadir("sixvintages.csv")),df)
 
