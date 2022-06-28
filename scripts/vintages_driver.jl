@@ -47,6 +47,46 @@ loc[1] = (360-152,35,3500) # North Pacific
 loc[2] = (360-152,-20,3500) # South Pacific
 compare_deltaresponses(loc)
 
+# try simple inversion
+#    local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
+gname = datadir("vintages_TMI_4x4_2012.nc")
+
+γ = Grid(TMI.pkgdatadir("TMI_modern_90x45x33_GH10_GH12.nc"))
+
+# set up a DataFrame
+ax1 = "location"
+ax2 = "longitude [°E]"
+ax3 = "latitude [°N]"
+ax4 = "depth [m]"
+zoutput = Dict(ax1 => ["North Pacific","South Pacific"],
+               ax2 => [loc[i][1] for i in 1:length(loc)],
+               ax3 => [loc[i][2] for i in 1:length(loc)],
+               ax4 => [loc[i][3] for i in 1:length(loc)])
+df = DataFrame(zoutput)
+
+for vv in vintage
+    println(vv)
+    gvintage = readfield(gname,vv,γ)
+
+    # get weighted interpolation indices
+    wis= Vector{Tuple{Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}}}(undef,2)
+
+    for (i,v) in enumerate(loc)
+        wis[i] = interpindex(v,γ)
+    end
+
+    gloc = observe(gvintage,wis,γ) # kludge to convert to sc
+
+    xax = String(vv)*" [%]"
+
+    insertcols!(df, xax => 100gloc)
+
+    println(df)
+    #!isdir(datadir("csv")) && mkdir(datadir("csv"))
+
+end
+
+CSV.write(datadir("sixvintages.csv")),df)
 
 
 #Thomas R. Knutson, Jeffrey Ploshay. Journal of Climate. DOI: 10.1175/JCLI-D-19-0997.1: 2 mbar/century trends in CMIP5

@@ -109,9 +109,7 @@ function vintages_section(params)
 
     tlabel = "Vintage: "* longname[vintage] * ", lon="*string(lon)*"E"
     println(tlabel)
-    #fname = "vintage_"*string(v)*"_"*string(depth)*"m.png"
 
-    #println(size(g.tracer))
     sectionplot(100g, lon, lims; titlelabel=tlabel) 
 
     savefig(plotsdir(froot))
