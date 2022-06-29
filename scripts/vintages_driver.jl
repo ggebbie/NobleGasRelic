@@ -97,7 +97,7 @@ t̄ = Dict{Symbol,Float64}()
 for vv in vintage
     t̄[vv] =  (tinterval[vv][1] + tinterval[vv][2])/2
 end
-t̄[:preRWP] = 1000.0  # instead of Inf
+t̄[:preRWP] = -500.0  # instead of Inf
 
 # make a covariance matrix that penalizes differences
 # greater than 1 mbar/century
@@ -106,6 +106,7 @@ t̄[:preRWP] = 1000.0  # instead of Inf
 nv = length(vintage)
 #D = Matrix{Float64}(undef,nv,nv)
 S⁻ = zeros(Float64,nv,nv)
+scentury = 2 # mbar/ century expected trend
 for (mm,ii) in enumerate(vintage)
     for (nn,jj) in enumerate(vintage)
         if ii != jj
@@ -113,7 +114,7 @@ for (mm,ii) in enumerate(vintage)
             δ = zeros(nv)
             δ[mm] = 1.0
             δ[nn] = -1.0
-            global S⁻ += 1/(Δt/100)^2 * (δ * transpose(δ))
+            global S⁻ += 1/(scentury*Δt/100)^2 * (δ * transpose(δ))
         end
     end
 
@@ -124,28 +125,39 @@ for (mm,ii) in enumerate(vintage)
     
 end
 
-# Solve it. 
-W⁻ = 1/(0.1^2)
-y = 3.5
-xtmp = (transpose(ΔE)*W⁻*ΔE + S⁻) \ (transpose(ΔE)*W⁻*y)
+Cₓₓ = inv(S⁻)
+# Solve it.
+ΔNe = 3.7 # mbar
+σΔNe = 0.2 # mbar
+#W⁻ = 1/(0.2^2)
+#y = 3.7
+
+xtmp,P = gaussmarkovsolution(transpose(ΔE),ΔNe,σΔNe,Cₓₓ)
+
+#xtmp = (transpose(ΔE)*W⁻*ΔE + S⁻) \ (transpose(ΔE)*W⁻*y)
 ñ = ΔE*xtmp - y
 
 x̃ = Dict{Symbol,Float64}()
+σx̃ = Dict{Symbol,Float64}()
 for (mm,ii) in enumerate(vintage)
     x̃[ii] = xtmp[mm]
+    σx̃[ii] = √P[mm,mm]
 end
 
-
-
 # try with PlotlyJS instead
-plotlyjs(markershape=:auto)
+#plotlyjs(markershape=:auto)
+plotlyjs()
+#PlotlyJS.purge!(plt)
+#clf()
+Plots.plot()
 for vv in vintage
     println(t̄[vv])
     println(x̃[vv])
-    Plots.plot!((t̄[vv],x̃[vv]))
+    plt = Plots.plot!((t̄[vv],x̃[vv]),yerr=σx̃[vv],label=longname[vv])
 end
+Plots.plot!(xlabel="Calendar Year [CE]",ylabel="Δ(SLP) [mbar]")
 plotname = "sixvintages"
-Plots.savefig(plotsdir(plotname*".svg"))
+Plots.savefig(plotsdir(plotname*".pdf"))
 
 
 
