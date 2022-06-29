@@ -1,7 +1,7 @@
 using Revise, NobleGasRelic, DrWatson, PyPlot, LinearAlgebra
-using TMI, DataFrames, Interpolations, PlotlyJS, Plots
+using TMI, DataFrames, Interpolations, PlotlyJS, Plots, OrderedCollections
 
-tinterval = Dict(:MOD => (1860, 2022),
+tinterval = OrderedDict(:MOD => (1860, 2022),
                 :LIA => (1350,1860),
                 :MCA => (800, 1350),
                 :DACP => (400,800),
