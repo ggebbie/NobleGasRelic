@@ -1,5 +1,5 @@
 using Revise, NobleGasRelic, DrWatson, PyPlot, LinearAlgebra
-using TMI, DataFrames, Interpolations, PlotlyJS, Plots, OrderedCollections
+using TMI, DataFrames, Interpolations, PlotlyJS, Plots, OrderedCollections, CSV
 
 tinterval = OrderedDict(:MOD => (1860, 2022),
                 :LIA => (1350,1860),
@@ -30,6 +30,12 @@ lon = [162, 210]
 
 params = @strdict vintage depth tinterval longname
 dicts = dict_list(params)
+
+# avoid error with NetCDF key already existing by
+# moving existing file to SAVE version
+isfile(datadir("vintages_TMI_4x4_2012.nc")) &&
+    mv(datadir("vintages_TMI_4x4_2012.nc"),
+       datadir("vintages_TMI_4x4_2012_SAVE.nc"),force=true)
 
 # planviews
 map(vintages_planview,dicts)
@@ -77,9 +83,8 @@ for vv in vintage
     end
 
     gloc = observe(gvintage,wis,γ) # kludge to convert to sc
-
+    
     xax = String(vv)*" [%]"
-
     insertcols!(df, xax => 100gloc)
 
     println(df)
@@ -135,7 +140,8 @@ Cₓₓ = inv(S⁻)
 xtmp,P = gaussmarkovsolution(transpose(ΔE),ΔNe,σΔNe,Cₓₓ)
 
 #xtmp = (transpose(ΔE)*W⁻*ΔE + S⁻) \ (transpose(ΔE)*W⁻*y)
-ñ = ΔE*xtmp - y
+ỹ = (E*xtmp)/100
+ñ = ΔE*xtmp - ΔNe
 
 x̃ = Dict{Symbol,Float64}()
 σx̃ = Dict{Symbol,Float64}()
@@ -144,10 +150,31 @@ for (mm,ii) in enumerate(vintage)
     σx̃[ii] = √P[mm,mm]
 end
 
+################################
 # try with PlotlyJS instead
-#plotlyjs(markershape=:auto)
-plotlyjs()
+# doesn't work because legend outside plot axes
+plotlyjs(markershape=:auto)
+#plotlyjs()
 #PlotlyJS.purge!(plt)
+#clf()
+Plots.plot()
+layout = Layout(legend=attr(x=1800.0, y=10.0))
+for vv in vintage
+    println(t̄[vv])
+    println(x̃[vv])
+    plt = Plots.plot!((t̄[vv],x̃[vv]),yerr=σx̃[vv],label=longname[vv])
+end
+#Plots.plot!(xlabel="Calendar Year [CE]",ylabel="Δ(SLP) [mbar]",legend=:bottomleft)
+#Plots.plot!(xlabel="Calendar Year [CE]",ylabel="Δ(SLP) [mbar]",)
+#Plots.plot!(xlabel="Calendar Year [CE]",ylabel="Δ(SLP) [mbar]",Layout(legend=attr(yanchor="top", xanchor="right")))
+Plots.plot!(xlabel="Calendar Year [CE]",ylabel="Δ(SLP) [mbar]",layout)
+plotname = "sixvintages"
+Plots.savefig(plotsdir(plotname*".svg"))
+
+################################
+# try with GR
+# doesn't work because legend outside plot axes
+gr()
 #clf()
 Plots.plot()
 for vv in vintage
@@ -155,19 +182,61 @@ for vv in vintage
     println(x̃[vv])
     plt = Plots.plot!((t̄[vv],x̃[vv]),yerr=σx̃[vv],label=longname[vv])
 end
-Plots.plot!(xlabel="Calendar Year [CE]",ylabel="Δ(SLP) [mbar]")
+Plots.plot!(xlabel="Calendar Year [CE]",ylabel="Δ(SLP) [mbar]",legend=:bottomleft)
 plotname = "sixvintages"
-Plots.savefig(plotsdir(plotname*".pdf"))
-
-
-
-Plots.plot!(ttrend,T*trend,ribbon=T*σtrend,color=:grey)
-Plots.plot!(xlabel="Calendar Year [CE]",ylabel=string(T)*"-yr Δ(SLP) [mbar]",legend=false)
-plotname = "SLPtrends_"*string(T)*"yr"
 Plots.savefig(plotsdir(plotname*".svg"))
 Plots.savefig(plotsdir(plotname*".pdf"))
 
-CSV.write(datadir("sixvintages.csv")),df)
+### RIBBON PLOTS
+gr()
+Plots.plot()
+t̄sort = zeros(nv)
+x̃sort = zeros(nv)
+σx̃sort = zeros(nv)
+for (ii,vv) in enumerate(vintage)
+    t̄sort[ii] = t̄[vv]
+    x̃sort[ii] = x̃[vv]
+    σx̃sort[ii] = σx̃[vv]
+end
+Plots.plot!(t̄sort,x̃sort,ribbon=σx̃sort,color=:grey,legend=false,marker=:circle,markercolor=:black)
+Plots.plot!(t̄sort,x̃sort,color=:black,legend=false,marker=:circle,markercolor=:black)
+Plots.plot!(xlabel="Calendar Year [CE]",ylabel="Δ(SLP) [mbar]",legend=false)
+plotname = "sixvintages_ribbon"
+Plots.savefig(plotsdir(plotname*".svg"))
+Plots.savefig(plotsdir(plotname*".pdf"))
+
+## add to the spreadsheet to put all results on there.
+nr = nrow(df)
+for vv in vintage
+    colname1 = String(vv)*" [%]"
+    colname2 = String(vv)*" SLP [mbar]"
+    colname3 = String(vv)*" σ(SLP) [mbar]"
+    #colname4 = String(vv)*" influence [mbar]"
+
+    SLPvals = repeat([x̃[vv]],nr)
+    insertcols!(df, colname1, colname2 => SLPvals, after=true)
+
+    σvals= repeat([σx̃[vv]],nr)
+    insertcols!(df, colname2, colname3 => σvals, after=true)
+
+    #σvals= repeat([x̃[vv]],nr)
+    #insertcols!(df, colname2, colname3 => σvals, after=true)
+
+end
+lastcolname1 = String(:preRWP)*" σ(SLP) [mbar]"
+lastcolname2 = "Total SLP influence [mbar]"
+insertcols!(df, lastcolname1, lastcolname2 => ỹ, after=true)
+
+#dfmat = Matrix(df)
+#dfdiff = Vector{Any}(undef,ncol(df))
+
+#dfdiff[5:end] = dfmat[1,5:end] .- dfmat[2,5:end]
+#dfdiff[1:4] .= ""
+#insert!(df,
+# insert 3rd row
+#insert!.(eachcol(df), 3*ones(nc), dfdiff)
+#df2 = DataFrame(dfdiff,names(df))
+CSV.write(datadir("sixvintages.csv"),df)
 
 
 #Thomas R. Knutson, Jeffrey Ploshay. Journal of Climate. DOI: 10.1175/JCLI-D-19-0997.1: 2 mbar/century trends in CMIP5

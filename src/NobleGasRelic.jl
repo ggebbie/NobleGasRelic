@@ -67,12 +67,6 @@ function vintages_planview(params)
 
     @unpack vintage, depth, tinterval, longname = params 
 
-    # avoid error with NetCDF key already existing by
-    # moving existing file to SAVE version
-    isfile(datadir("vintages_TMI_4x4_2012.nc")) &&
-        mv(datadir("vintages_TMI_4x4_2012.nc"),
-           datadir("vintages_TMI_4x4_2012_SAVE.nc"),force=true)
-
     # doing this every time, not so efficient
     
     Δ,τ = read_stepresponse()
