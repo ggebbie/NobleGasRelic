@@ -130,11 +130,20 @@ function compare_deltaresponses(loc)
 
     Δg = g[1] - g[2]
 
+    leglabel = Vector{String}(undef,2)
+    for ii = 1:2
+        if loc[ii][2] > 0
+            leglabel[ii] = string((loc[ii][2]))*"°N, "*string(360-loc[ii][1])*"°W, "*string(round(loc[ii][3]/1000,sigdigits=2))*" km"
+        else
+            leglabel[ii] = string((-loc[ii][2]))*"°S, "*string(360-loc[ii][1])*"°W, "*string(round(loc[ii][3]/1000,sigdigits=2))*" km"
+        end           
+    end
+    
     # PyPlot version, not currently showing
     figure(2)
     clf()
-    line1, = PyPlot.plot(tg,g[1],"black",label="35°N, 152°W, 3.5 km")
-    line2, = PyPlot.plot(tg,g[2],"red",label="20°S, 152°W, 3.5 km")
+    line1, = PyPlot.plot(tg,g[1],"black",label=leglabel[1])
+    line2, = PyPlot.plot(tg,g[2],"red",label=leglabel[2])
     line3, = PyPlot.plot(tg,Δg,"green",label="Δ")
     grid("true")
     xlabel("Lag, τ [yr]")

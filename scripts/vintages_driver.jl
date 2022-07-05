@@ -51,7 +51,7 @@ map(vintages_section,dicts)
 n = 2
 loc = Vector{Tuple}(undef,n)
 loc[1] = (360-152,35,3500) # North Pacific
-loc[2] = (360-152,-20,3500) # South Pacific
+loc[2] = (360-152,-10,3500) # South Pacific
 compare_deltaresponses(loc)
 
 # try simple inversion
