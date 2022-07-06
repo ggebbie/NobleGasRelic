@@ -132,8 +132,8 @@ end
 
 Cₓₓ = inv(S⁻)
 # Solve it.
-ΔNe = 3.7 # mbar
-σΔNe = 0.2 # mbar
+ΔNe = 3.5 # mbar
+σΔNe = 0.5 # mbar
 #W⁻ = 1/(0.2^2)
 #y = 3.7
 
