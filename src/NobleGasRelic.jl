@@ -4,7 +4,7 @@ using PyCall, PyPlot, DrWatson, TMI, TMItransient, Interpolations, LinearAlgebra
 
 export vintages_planview, vintages_section, agedistribution,
     taudeltaresponse, compare_deltaresponses, priorcovariance,
-    gaussmarkovsolution, anomalymatrix, magnitude, trendmatrix,propagate
+    gaussmarkovsolution, anomalymatrix, magnitude, trendmatrix, propagate, vintage_atloc
 
 const mpl = PyNULL()
 const plt = PyNULL()
@@ -65,7 +65,7 @@ end
 
 function vintages_planview(params)
 
-    @unpack vintage, depth, tinterval, longname = params 
+    @unpack vintage, depth, tinterval, longnamelabel = params 
 
     # doing this every time, not so efficient
     
@@ -97,7 +97,7 @@ end
 
 function vintages_section(params)
 
-    @unpack vintage, lon, tinterval, longname = params 
+    @unpack vintage, lon, tinterval, longnamelabel = params 
 
     lims = vcat(collect(0:5:50),100)
     # doing this every time, not so efficient
@@ -295,4 +295,26 @@ function propagate(M,x,P)
     return d,σd
 end
 
+"""
+function vintage_atloc(vname,loc)
+
+Compute fractional contribution of vintage `vname`
+at location/s `loc`
+"""
+function vintage_atloc(vname,loc)
+
+    gname = datadir("vintages_TMI_4x4_2012.nc")
+    γ = Grid(TMI.pkgdatadir("TMI_modern_90x45x33_GH10_GH12.nc"))
+    gvintage = readfield(gname,vname,γ)
+
+    # get weighted interpolation indices
+    wis= Vector{Tuple{Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}}}(undef,2)
+
+    for (i,v) in enumerate(loc)
+        wis[i] = interpindex(v,γ)
+    end
+
+    return gloc = observe(gvintage,wis,γ) 
+end
+    
 end

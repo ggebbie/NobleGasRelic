@@ -18,8 +18,9 @@ longname = Dict(:MOD => "Modern Warming",
                 :preRWP => "Pre-Roman Warm Period")
 
 # add dates to longname
+longnamelabel = Dict{Symbol,String}()
 for (kk,vv) in longname
-    longname[kk] *= (" "*string(tinterval[kk])*" CE")
+    longnamelabel[kk] = longname[kk]*" "*string(tinterval[kk])*" CE"
 end
 
 vintage = collect(keys(tinterval))
@@ -28,7 +29,7 @@ depth = collect(2000:500:4000)
 # lon must match grid exactly or else "dropped dims" error
 lon = [162, 210]
 
-params = @strdict vintage depth tinterval longname
+params = @strdict vintage depth tinterval longnamelabel
 dicts = dict_list(params)
 
 # avoid error with NetCDF key already existing by
@@ -42,7 +43,7 @@ map(vintages_planview,dicts)
 
 ## sections
 
-params = @strdict vintage lon tinterval longname
+params = @strdict vintage lon tinterval longnamelabel
 dicts = dict_list(params)
 
 map(vintages_section,dicts)
@@ -56,46 +57,40 @@ compare_deltaresponses(loc)
 
 # try simple inversion
 #    local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
-gname = datadir("vintages_TMI_4x4_2012.nc")
-
-γ = Grid(TMI.pkgdatadir("TMI_modern_90x45x33_GH10_GH12.nc"))
 
 # set up a DataFrame
-ax1 = "location"
-ax2 = "longitude [°E]"
-ax3 = "latitude [°N]"
-ax4 = "depth [m]"
-zoutput = Dict(ax1 => ["North Pacific","South Pacific"],
-               ax2 => [loc[i][1] for i in 1:length(loc)],
-               ax3 => [loc[i][2] for i in 1:length(loc)],
-               ax4 => [loc[i][3] for i in 1:length(loc)])
-df = DataFrame(zoutput)
+# ax1 = "location"
+# ax2 = "longitude [°E]"
+# ax3 = "latitude [°N]"
+# ax4 = "depth [m]"
 
+col1 = "Vintage"
+col2 = "Vintage Name"
+col2b = "Years CE"
+col3 = "Southern Region"
+col4 = "Northern Region"
+col5 = "SLP Anomaly [mbar]"
+col6 = "SLP Error [mbar]"
+
+defs = Dict(col1 => vintage,
+            col2 => [longname[vv] for vv in vintage],
+            col2b => [tinterval[vv] for vv in vintage])
+df = DataFrame(defs)
+
+gnorth = Dict{Symbol,Float64}()
+gsouth = Dict{Symbol,Float64}()
 for vv in vintage
     println(vv)
-    gvintage = readfield(gname,vv,γ)
-
-    # get weighted interpolation indices
-    wis= Vector{Tuple{Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}, Interpolations.WeightedAdjIndex{2, Float64}}}(undef,2)
-
-    for (i,v) in enumerate(loc)
-        wis[i] = interpindex(v,γ)
-    end
-
-    gloc = observe(gvintage,wis,γ) # kludge to convert to sc
-    
-    xax = String(vv)*" [%]"
-    insertcols!(df, xax => 100gloc)
-
-    println(df)
-    #!isdir(datadir("csv")) && mkdir(datadir("csv"))
-
+    gtmp = vintage_atloc(vv,loc)
+    gnorth[vv] = gtmp[1]
+    gsouth[vv] = gtmp[2]
 end
 
-names(df)
+insertcols!(df, col3 => [round(100gsouth[vv],digits=1) for vv in vintage])
+insertcols!(df, col4 => [round(100gnorth[vv],digits=1) for vv in vintage])
 
-E = Matrix(df)[:,5:10]
-ΔE = transpose(E[1,:]-E[2,:])/100
+E = Matrix(df)[:,4:5]
+ΔE = transpose(E[:,2]-E[:,1])/100
 
 # find time difference between vintages
 t̄ = Dict{Symbol,Float64}()
@@ -125,7 +120,7 @@ for (mm,ii) in enumerate(vintage)
 
     # add constraint that MOD equals zero (Reference)
     if ii == :MOD
-        S⁻[mm,mm] = 1/(0.1^2) # within 0.1
+        S⁻[mm,mm] = 1/(0.01^2) # within 0.01
     end
     
 end
@@ -134,13 +129,11 @@ Cₓₓ = inv(S⁻)
 # Solve it.
 ΔNe = 3.5 # mbar
 σΔNe = 0.5 # mbar
-#W⁻ = 1/(0.2^2)
-#y = 3.7
 
 xtmp,P = gaussmarkovsolution(transpose(ΔE),ΔNe,σΔNe,Cₓₓ)
 
 #xtmp = (transpose(ΔE)*W⁻*ΔE + S⁻) \ (transpose(ΔE)*W⁻*y)
-ỹ = (E*xtmp)/100
+ỹ = (transpose(E)*xtmp)/100
 ñ = ΔE*xtmp - ΔNe
 
 x̃ = Dict{Symbol,Float64}()
@@ -149,6 +142,10 @@ for (mm,ii) in enumerate(vintage)
     x̃[ii] = xtmp[mm]
     σx̃[ii] = √P[mm,mm]
 end
+
+insertcols!(df, col5 => [round(x̃[vv],digits=1) for vv in vintage])
+insertcols!(df, col6 => [round(σx̃[vv],digits=1) for vv in vintage])
+CSV.write(datadir("sixvintages.csv"),df)
 
 ################################
 # try with PlotlyJS instead
@@ -162,7 +159,7 @@ layout = Layout(legend=attr(x=1800.0, y=10.0))
 for vv in vintage
     println(t̄[vv])
     println(x̃[vv])
-    plt = Plots.plot!((t̄[vv],x̃[vv]),yerr=σx̃[vv],label=longname[vv])
+    plt = Plots.plot!((t̄[vv],x̃[vv]),yerr=σx̃[vv],label=longnamelabel[vv])
 end
 #Plots.plot!(xlabel="Calendar Year [CE]",ylabel="Δ(SLP) [mbar]",legend=:bottomleft)
 #Plots.plot!(xlabel="Calendar Year [CE]",ylabel="Δ(SLP) [mbar]",)
@@ -180,7 +177,7 @@ Plots.plot()
 for vv in vintage
     println(t̄[vv])
     println(x̃[vv])
-    plt = Plots.plot!((t̄[vv],x̃[vv]),yerr=σx̃[vv],label=longname[vv])
+    plt = Plots.plot!((t̄[vv],x̃[vv]),yerr=σx̃[vv],label=longnamelabel[vv])
 end
 Plots.plot!(xlabel="Calendar Year [CE]",ylabel="Δ(SLP) [mbar]",legend=:bottomleft)
 plotname = "sixvintages"
@@ -199,7 +196,11 @@ for (ii,vv) in enumerate(vintage)
     σx̃sort[ii] = σx̃[vv]
 end
 Plots.plot!(t̄sort,x̃sort,ribbon=σx̃sort,color=:grey,legend=false,marker=:circle,markercolor=:black)
-Plots.plot!(t̄sort,x̃sort,color=:black,legend=false,marker=:circle,markercolor=:black)
+#Plots.plot!(t̄sort,x̃sort,color=:black,legend=false,marker=:circle,markercolor=:black)
+for ii in 1:length(σx̃sort)
+    Plots.plot!(t̄sort[ii],x̃sort[ii],color=:black,legend=false,yerr=σx̃sort[ii])
+end
+
 Plots.plot!(xlabel="Calendar Year [CE]",ylabel="Δ(SLP) [mbar]",legend=false)
 plotname = "sixvintages_ribbon"
 Plots.savefig(plotsdir(plotname*".svg"))
@@ -236,7 +237,7 @@ insertcols!(df, lastcolname1, lastcolname2 => ỹ, after=true)
 # insert 3rd row
 #insert!.(eachcol(df), 3*ones(nc), dfdiff)
 #df2 = DataFrame(dfdiff,names(df))
-CSV.write(datadir("sixvintages.csv"),df)
+
 
 
 #Thomas R. Knutson, Jeffrey Ploshay. Journal of Climate. DOI: 10.1175/JCLI-D-19-0997.1: 2 mbar/century trends in CMIP5
