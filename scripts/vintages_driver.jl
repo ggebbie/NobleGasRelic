@@ -186,6 +186,7 @@ Plots.savefig(plotsdir(plotname*".pdf"))
 
 ### RIBBON PLOTS
 gr()
+plotlyjs()
 Plots.plot()
 t̄sort = zeros(nv)
 x̃sort = zeros(nv)
@@ -195,12 +196,8 @@ for (ii,vv) in enumerate(vintage)
     x̃sort[ii] = x̃[vv]
     σx̃sort[ii] = σx̃[vv]
 end
-Plots.plot!(t̄sort,x̃sort,ribbon=σx̃sort,color=:grey,legend=false,marker=:circle,markercolor=:black)
-#Plots.plot!(t̄sort,x̃sort,color=:black,legend=false,marker=:circle,markercolor=:black)
-for ii in 1:length(σx̃sort)
-    Plots.plot!(t̄sort[ii],x̃sort[ii],color=:black,legend=false,yerr=σx̃sort[ii])
-end
-
+Plots.plot!(t̄sort,x̃sort,ribbon=σx̃sort,color=:grey,linealpha=0,legend=false,markershape=:none)
+Plots.plot!([t̄sort'; t̄sort'], [(x̃sort-σx̃sort)';(x̃sort+σx̃sort)'],color=:black,linewidth=1)
 Plots.plot!(xlabel="Calendar Year [CE]",ylabel="Δ(SLP) [mbar]",legend=false)
 plotname = "sixvintages_ribbon"
 Plots.savefig(plotsdir(plotname*".svg"))
