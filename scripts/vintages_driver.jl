@@ -1,5 +1,15 @@
-using Revise, NobleGasRelic, DrWatson, PyPlot, LinearAlgebra
-using TMI, DataFrames, Interpolations, PlotlyJS, Plots, OrderedCollections, CSV
+using Revise
+using NobleGasRelic
+using DrWatson
+using PyPlot
+using LinearAlgebra
+using TMI
+using DataFrames
+using Interpolations
+using PlotlyJS
+using Plots
+using OrderedCollections
+using CSV
 
 tinterval = OrderedDict(:MOD => (1860, 2022),
                 :LIA => (1350,1860),
