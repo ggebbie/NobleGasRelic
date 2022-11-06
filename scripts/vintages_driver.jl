@@ -63,6 +63,9 @@ loc[1] = (360-152,35,3500) # North Pacific
 loc[2] = (360-152,-10,3500) # South Pacific
 compare_deltaresponses(loc)
 
+# N.Pac: why more RWP than DACP water?
+diagnose_deltaresponse(loc[1])
+
 # try simple inversion
 #    local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
 
@@ -81,7 +84,7 @@ col5 = "SLP Anomaly [mbar]"
 col6 = "SLP Error [mbar]"
 
 defs = Dict(col1 => vintage,
-            col2 => [longname[vv] for vv in vintage],
+            col2 => [longnamelabel[vv] for vv in vintage],
             col2b => [tinterval[vv] for vv in vintage])
 df = DataFrame(defs)
 

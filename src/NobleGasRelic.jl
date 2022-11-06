@@ -8,7 +8,8 @@ using GGplot
 
 export vintages_planview, vintages_section, agedistribution,
     taudeltaresponse, compare_deltaresponses, priorcovariance,
-    gaussmarkovsolution, anomalymatrix, magnitude, trendmatrix, propagate, vintage_atloc
+    gaussmarkovsolution, anomalymatrix, magnitude, trendmatrix,
+    propagate, vintage_atloc, diagnose_deltaresponse
 
 const mpl = PyNULL()
 const plt = PyNULL()
@@ -117,6 +118,35 @@ function vintages_section(params)
     sectionplot(100g, lon, lims; titlelabel=tlabel) 
 
     savefig(plotsdir(froot))
+
+end
+
+"""
+    function diagnose_deltaresponse(loc)
+
+    Input: one location
+
+    Side-effect: plot of delta response and heaviside response
+"""
+function diagnose_deltaresponse(loc)
+    g = agedistribution(loc)
+    tg = taudeltaresponse()
+
+    if loc[2] > 0
+        leglabel = string((loc[2]))*"°N, "*string(360-loc[1])*"°W, "*string(round(loc[3]/1000,sigdigits=2))*" km"
+    else
+        leglabel = string((-loc[2]))*"°S, "*string(360-loc[1])*"°W, "*string(round(loc[3]/1000,sigdigits=2))*" km"
+    end
+    
+    # PyPlot version, not currently showing
+    figure(2)
+    clf()
+    line1, = PyPlot.plot(tg,g,"black",label=leglabel[1])
+    grid("true")
+    xlabel("Lag, τ [yr]")
+    ylabel("mass fraction per yr [1/yr]")
+    legend()
+    PyPlot.savefig(plotsdir("deltaresponse_at_loc.png"))
 
 end
 
