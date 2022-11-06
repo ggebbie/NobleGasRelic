@@ -73,7 +73,7 @@ function vintages_planview(params)
     g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ,interp="linear")
 
     # get the meta-data correct on the output.
-    gvintage = Field(g.tracer,g.γ,vintage,longname[vintage],"seawater mass fraction []")
+    gvintage = Field(g.tracer,g.γ,vintage,longnamelabel[vintage],"seawater mass fraction []")
     # save g to file if it hasn't been done before.
     if isapprox(depth,2000) # kludge to not write twice
         println("writing",depth,vintage)
@@ -84,7 +84,7 @@ function vintages_planview(params)
     froot = plotsdir(savename("TMI_4x4_2012",params,"png",accesses=["vintage","depth"]))
     println(froot)
 
-    tlabel = "Vintage: "* longname[vintage] * ", depth="*string(depth)*"m"
+    tlabel = "Vintage: "* longnamelabel[vintage] * ", depth="*string(depth)*"m"
     println(tlabel)
     #fname = "vintage_"*string(v)*"_"*string(depth)*"m.png"
 
