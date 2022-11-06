@@ -52,10 +52,8 @@ isfile(datadir("vintages_TMI_4x4_2012.nc")) &&
 map(vintages_planview,dicts)
 
 ## sections
-
 params = @strdict vintage lon tinterval longnamelabel
 dicts = dict_list(params)
-
 map(vintages_section,dicts)
 
 # get 2 age distributions (TTDs), ultimately we have info about their difference

@@ -2,7 +2,7 @@
 
 julia_version = "1.8.2"
 manifest_format = "2.0"
-project_hash = "ae02da4ded5beb1fee01213e5a43726cccb2de15"
+project_hash = "a34e40efef42dcf1da0abbf029a9f6d8f15f226f"
 
 [[deps.Adapt]]
 deps = ["LinearAlgebra"]
@@ -541,6 +541,12 @@ version = "0.5.0"
 [[deps.Future]]
 deps = ["Random"]
 uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
+
+[[deps.GGplot]]
+deps = ["Conda", "Pkg", "PyCall", "PyPlot", "TMI"]
+path = "/home/gebbie/projects/GGplot"
+uuid = "1e05a8e1-7dec-4f9e-9d3d-7df52321841b"
+version = "0.1.0"
 
 [[deps.GLFW_jll]]
 deps = ["Artifacts", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pkg", "Xorg_libXcursor_jll", "Xorg_libXi_jll", "Xorg_libXinerama_jll", "Xorg_libXrandr_jll"]

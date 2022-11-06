@@ -1,6 +1,10 @@
 module NobleGasRelic
 
-using PyCall, PyPlot, DrWatson, TMI, TMItransient, Interpolations, LinearAlgebra
+using PyCall
+using PyPlot
+using DrWatson, TMI, TMItransient, Interpolations
+using LinearAlgebra
+using GGplot
 
 export vintages_planview, vintages_section, agedistribution,
     taudeltaresponse, compare_deltaresponses, priorcovariance,
@@ -107,7 +111,7 @@ function vintages_section(params)
     froot = plotsdir(savename("TMI_4x4_2012",params,"png",accesses=["vintage","lon"]))
     println(froot)
 
-    tlabel = "Vintage: "* longname[vintage] * ", lon="*string(lon)*"E"
+    tlabel = "Vintage: "* longnamelabel[vintage] * ", lon="*string(lon)*"E"
     println(tlabel)
 
     sectionplot(100g, lon, lims; titlelabel=tlabel) 
