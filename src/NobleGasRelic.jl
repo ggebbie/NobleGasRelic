@@ -122,33 +122,76 @@ function vintages_section(params)
 end
 
 """
-    function diagnose_deltaresponse(loc)
+    function diagnose_deltaresponse(loc,vintage,tinterval)
 
     Input: one location
 
     Side-effect: plot of delta response and heaviside response
 """
-function diagnose_deltaresponse(loc)
-    g = agedistribution(loc)
-    tg = taudeltaresponse()
+function diagnose_deltaresponse(locall,vintage,tinterval)
 
-    if loc[2] > 0
-        leglabel = string((loc[2]))*"°N, "*string(360-loc[1])*"°W, "*string(round(loc[3]/1000,sigdigits=2))*" km"
-    else
-        leglabel = string((-loc[2]))*"°S, "*string(360-loc[1])*"°W, "*string(round(loc[3]/1000,sigdigits=2))*" km"
-    end
+    for ll = 1:length(locall)
+        figno = 99 + ll
+        println(figno)
+        loc = locall[ll]
+        println(loc)
+        g = agedistribution(loc)
+        tg = taudeltaresponse()
+
     
-    # PyPlot version, not currently showing
-    figure(2)
-    clf()
-    line1, = PyPlot.plot(tg,g,"black",label=leglabel[1])
-    grid("true")
-    xlabel("Lag, τ [yr]")
-    ylabel("mass fraction per yr [1/yr]")
-    legend()
-    PyPlot.savefig(plotsdir("deltaresponse_at_loc.png"))
+        if loc[2] > 0
+            leglabel = string((loc[2]))*"°N, "*string(360-loc[1])*"°W, "*string(round(loc[3]/1000,sigdigits=2))*" km"
+        else
+            leglabel = string((-loc[2]))*"°S, "*string(360-loc[1])*"°W, "*string(round(loc[3]/1000,sigdigits=2))*" km"
+        end
 
+        fracs = Dict{Symbol,Float64}()
+        for vv in vintage
+            fracs[vv] = vintage_atloc(vv,locall)[ll]
+        end
+
+        println(figno)
+        figure(figno)
+        clf()
+        line1, = PyPlot.plot(tg,g,"black",label=leglabel)
+        grid("true")
+        xlabel("Lag, τ [yr]")
+        ylabel("mass fraction per yr [1/yr]")
+        legend()
+        PyPlot.savefig(plotsdir("deltaresponse_at_loc"*string(ll)*".png"))
+
+        
+    # plot with calendar years
+        figno += 100
+        figure(figno)
+        clf()
+        line2, = PyPlot.plot(2022 .-tg,g,"black",label=leglabel)
+        for vv in vintage
+            yrs = 2021 .- tinterval[vv]
+            if yrs[1] < 10000
+                global iyrs1 = convert(Int,yrs[1])
+            end
+            if yrs[2] < 10000
+                global iyrs2 = convert(Int,yrs[2])
+            end
+
+            if tinterval[vv][1] > -1000 && iyrs1 < 10000 && iyrs2 < 10000
+                line3, = PyPlot.plot([tinterval[vv][1],tinterval[vv][1]],[g[iyrs1], 0],"black")
+                text(tinterval[vv][1],2*g[iyrs1]/3,string(vv))
+                text(tinterval[vv][1],g[iyrs1]/3,string(convert(Int,round(100fracs[vv]))))
+            end
+            #PyPlot.text(0.5,0.5,string(vv))
+        end
+    
+        grid("true")
+        xlabel("calendar year [CE]")
+        ylabel("mass fraction per yr [1/yr]")
+        legend()
+        PyPlot.savefig(plotsdir("deltaresponse_at_loc_CE"*string(ll)*".png"))
+
+    end
 end
+
 
 """
     function compare_deltaresponses(loc)

@@ -56,15 +56,6 @@ params = @strdict vintage lon tinterval longnamelabel
 dicts = dict_list(params)
 map(vintages_section,dicts)
 
-# get 2 age distributions (TTDs), ultimately we have info about their difference
-n = 2
-loc = Vector{Tuple}(undef,n)
-loc[1] = (360-152,35,3500) # North Pacific
-loc[2] = (360-152,-10,3500) # South Pacific
-compare_deltaresponses(loc)
-
-# N.Pac: why more RWP than DACP water?
-diagnose_deltaresponse(loc[1])
 
 # try simple inversion
 #    local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
