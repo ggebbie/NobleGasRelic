@@ -7,12 +7,13 @@ using TMI
 using DataFrames
 using Interpolations
 #using PlotlyJS
-using Plots
+#using Plots
 using OrderedCollections
 using CSV
 
+t_today = 2022
 # each interval is 500 years
-tinterval = OrderedDict(:MOD => (1800, 2023),
+tinterval = OrderedDict(:MOD => (1800, t_today),
                 :LIA => (1300,1800),
                 :MCA => (800,1300),
                 :DACP => (300,800),
@@ -51,6 +52,9 @@ isfile(datadir("vintages_TMI_4x4_2012.nc")) &&
 
 # planviews
 map(vintages_planview,dicts)
+
+# test one at a time
+vintages_planview(dicts[1])
 
 ## sections
 params = @strdict vintage lon tinterval longnamelabel

@@ -1,7 +1,7 @@
 module NobleGasRelic
 
-using PyCall
-using PyPlot
+#using PyCall
+#using PyPlot
 using DrWatson, TMI, TMItransient, Interpolations
 using LinearAlgebra
 using GGplot
@@ -11,62 +11,62 @@ export vintages_planview, vintages_section, agedistribution,
     gaussmarkovsolution, anomalymatrix, magnitude, trendmatrix,
     propagate, vintage_atloc, diagnose_deltaresponse
 
-const mpl = PyNULL()
-const plt = PyNULL()
-const cmocean = PyNULL()
-const cartopy = PyNULL()
+# const mpl = PyNULL()
+# const plt = PyNULL()
+# const cmocean = PyNULL()
+# const cartopy = PyNULL()
 
-#Initialize all Python packages - install with conda through Julia
-function __init__()
+# #Initialize all Python packages - install with conda through Julia
+# function __init__()
 
-    # following ClimatePlots.jl
-    copy!(mpl, pyimport_conda("matplotlib", "matplotlib", "conda-forge"))
-    copy!(cartopy, pyimport_conda("cartopy", "cartopy", "conda-forge"))
+#     # following ClimatePlots.jl
+#     copy!(mpl, pyimport_conda("matplotlib", "matplotlib", "conda-forge"))
+#     copy!(cartopy, pyimport_conda("cartopy", "cartopy", "conda-forge"))
 
-    #copy!(plt, pyimport_conda("matplotlib.pyplot", "matplotlib", "conda-forge"))
-    #copy!(cmocean, pyimport_conda("cmocean", "cmocean", "conda-forge"))
+#     #copy!(plt, pyimport_conda("matplotlib.pyplot", "matplotlib", "conda-forge"))
+#     #copy!(cmocean, pyimport_conda("cmocean", "cmocean", "conda-forge"))
 
-    println("Python libraries installed")
- end
+#     println("Python libraries installed")
+#  end
 
-function planviewplotcartopy(c::Field{T}, depth, lims;titlelabel="section plot") where T <: Real
+# function planviewplotcartopy(c::Field{T}, depth, lims;titlelabel="section plot") where T <: Real
 
-    cmap_seismic = get_cmap("seismic")
-    #cmap_hot = get_cmap("hot_r")
-    cmap_hot = get_cmap("inferno_r")
-    cplan = planview(c,depth)
+#     cmap_seismic = get_cmap("seismic")
+#     #cmap_hot = get_cmap("hot_r")
+#     cmap_hot = get_cmap("inferno_r")
+#     cplan = planview(c,depth)
 
-    fig = figure(202)
-    clf()
-    cenlon = -160.0
-    proj0 = cartopy.crs.PlateCarree()
-    proj = cartopy.crs.PlateCarree(central_longitude=cenlon)
-    ax = fig.add_subplot(projection = proj)
-    ax.set_global()
-    #ax.coastlines()
-    ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor="black", facecolor="black")
+#     fig = figure(202)
+#     clf()
+#     cenlon = -160.0
+#     proj0 = cartopy.crs.PlateCarree()
+#     proj = cartopy.crs.PlateCarree(central_longitude=cenlon)
+#     ax = fig.add_subplot(projection = proj)
+#     ax.set_global()
+#     #ax.coastlines()
+#     ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor="black", facecolor="black")
     
-    outdir = plotsdir()
-    !isdir(outdir) && mkpath(outdir) 
-    outfname = plotsdir("vintage.png")
-    xlbl = "longitude "*L"[\degree E]"
-    ylbl = "latitude "*L"[\degree N]"
-    ax.set_title(titlelabel)
-    ax.set_xlabel(xlbl)
-    ax.set_ylabel(ylbl)
-    gl = ax.gridlines(draw_labels=true, dms=true, x_inline=false, y_inline=false, crs=proj0)
-    gl.top_labels = false
-    gl.right_labels = false
+#     outdir = plotsdir()
+#     !isdir(outdir) && mkpath(outdir) 
+#     outfname = plotsdir("vintage.png")
+#     xlbl = "longitude "*L"[\degree E]"
+#     ylbl = "latitude "*L"[\degree N]"
+#     ax.set_title(titlelabel)
+#     ax.set_xlabel(xlbl)
+#     ax.set_ylabel(ylbl)
+#     gl = ax.gridlines(draw_labels=true, dms=true, x_inline=false, y_inline=false, crs=proj0)
+#     gl.top_labels = false
+#     gl.right_labels = false
 
-    test = ax.contourf(c.γ.lon,c.γ.lat, cplan', lims, cmap=cmap_hot, transform = proj0)
+#     test = ax.contourf(c.γ.lon,c.γ.lat, cplan', lims, cmap=cmap_hot, transform = proj0)
 
-    colorbar(test,label="[%]",orientation="vertical",ticks=lims, fraction = 0.03)
-    CS = ax.contour(c.γ.lon,c.γ.lat, cplan', lims, colors="k", transform = proj0)
-    ax.clabel(CS, CS.levels, inline=true, fontsize=10)
+#     colorbar(test,label="[%]",orientation="vertical",ticks=lims, fraction = 0.03)
+#     CS = ax.contour(c.γ.lon,c.γ.lat, cplan', lims, colors="k", transform = proj0)
+#     ax.clabel(CS, CS.levels, inline=true, fontsize=10)
 
-    savefig(outfname)
+#     savefig(outfname)
 
-end
+# end
 
 function vintages_planview(params)
 
@@ -75,6 +75,10 @@ function vintages_planview(params)
     # doing this every time, not so efficient
     
     Δ,τ = read_stepresponse()
+    println(size(Δ))
+    println(size(τ))
+    println(tinterval[vintage][1],tinterval[vintage][2])
+    
     g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ,interp="linear")
 
     # get the meta-data correct on the output.
@@ -95,7 +99,7 @@ function vintages_planview(params)
 
     lims = vcat(collect(0:5:50),100)
     # Plan view plots
-    planviewplotcartopy(100g, depth, lims, titlelabel=tlabel)
+    GGplot.planviewplotcartopy(100g, depth, lims, titlelabel=tlabel)
     mv(plotsdir("vintage.png"),plotsdir(froot),force=true)
 
 end
@@ -137,16 +141,17 @@ function diagnose_deltaresponse(loc)
     else
         leglabel = string((-loc[2]))*"°S, "*string(360-loc[1])*"°W, "*string(round(loc[3]/1000,sigdigits=2))*" km"
     end
-    
+
+    # UPDATE THIS TO PLOTS.JL
     # PyPlot version, not currently showing
-    figure(2)
-    clf()
-    line1, = PyPlot.plot(tg,g,"black",label=leglabel[1])
-    grid("true")
-    xlabel("Lag, τ [yr]")
-    ylabel("mass fraction per yr [1/yr]")
-    legend()
-    PyPlot.savefig(plotsdir("deltaresponse_at_loc.png"))
+    # figure(2)
+    # clf()
+    # line1, = PyPlot.plot(tg,g,"black",label=leglabel[1])
+    # grid("true")
+    # xlabel("Lag, τ [yr]")
+    # ylabel("mass fraction per yr [1/yr]")
+    # legend()
+    # PyPlot.savefig(plotsdir("deltaresponse_at_loc.png"))
 
 end
 
@@ -172,18 +177,19 @@ function compare_deltaresponses(loc)
             leglabel[ii] = string((-loc[ii][2]))*"°S, "*string(360-loc[ii][1])*"°W, "*string(round(loc[ii][3]/1000,sigdigits=2))*" km"
         end           
     end
-    
+
+    # UPDATE TO USE PLOTS.JL
     # PyPlot version, not currently showing
-    figure(2)
-    clf()
-    line1, = PyPlot.plot(tg,g[1],"black",label=leglabel[1])
-    line2, = PyPlot.plot(tg,g[2],"red",label=leglabel[2])
-    line3, = PyPlot.plot(tg,Δg,"green",label="Δ")
-    grid("true")
-    xlabel("Lag, τ [yr]")
-    ylabel("mass fraction per yr [1/yr]")
-    legend()
-    PyPlot.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
+    # figure(2)
+    # clf()
+    # line1, = PyPlot.plot(tg,g[1],"black",label=leglabel[1])
+    # line2, = PyPlot.plot(tg,g[2],"red",label=leglabel[2])
+    # line3, = PyPlot.plot(tg,Δg,"green",label="Δ")
+    # grid("true")
+    # xlabel("Lag, τ [yr]")
+    # ylabel("mass fraction per yr [1/yr]")
+    # legend()
+    # PyPlot.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
 
     # try to use Plots 
     # Plots.plot(tg,g[1],color=:black,label="35°N, 152°W, 3.5 km")
@@ -219,6 +225,7 @@ function priorcovariance(tₚ,σₓ,σlong,Tlong)
     return Cₓₓ
 end
 
+# UPDATE TO USE BLUES.JL
 function gaussmarkovsolution(Eᵀ,y,σy,Cₓₓ)
 
     # Gauss-Markov solution method
