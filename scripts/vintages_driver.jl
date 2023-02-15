@@ -11,13 +11,14 @@ using Plots
 using OrderedCollections
 using CSV
 
-tinterval = OrderedDict(:MOD => (1860, 2022),
-                :LIA => (1350,1860),
-                :MCA => (800, 1350),
-                :DACP => (400,800),
+# each interval is 500 years
+tinterval = OrderedDict(:MOD => (1800, 2023),
+                :LIA => (1300,1800),
+                :MCA => (800,1300),
+                :DACP => (300,800),
                 #:DACP2 => (550,650),
-                 :RWP => (-250,400),
-                 :preRWP => (-Inf,-250))
+                 :RWP => (-200,300),
+                 :preRWP => (-Inf,-200))
 
 longname = Dict(:MOD => "Modern Warming",
                 :LIA => "Little Ice Age",
@@ -138,8 +139,8 @@ end
 
 Cₓₓ = inv(S⁻)
 # Solve it.
-ΔNe = 3.5 # mbar
-σΔNe = 0.5 # mbar
+ΔNe = 2.8mbar # mbar
+σΔNe = 0.4mbar # mbar
 
 xtmp,P = gaussmarkovsolution(transpose(ΔE),ΔNe,σΔNe,Cₓₓ)
 
