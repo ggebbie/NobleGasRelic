@@ -1,7 +1,6 @@
 module NobleGasRelic
 
-#using PyCall
-#using PyPlot
+using DataFrames
 using DrWatson, TMI, TMItransient, Interpolations
 using LinearAlgebra
 using GGplot
@@ -11,12 +10,13 @@ using Plots
 export vintages_planview, vintages_section,
     agedistribution,
     taudeltaresponse, compare_deltaresponses,
-    priorcovariance,
+    priorcovariance, covariance_temporalsmoothness,
     gaussmarkovsolution, anomalymatrix, magnitude,
     trendmatrix,
     propagate, vintage_atloc, diagnose_deltaresponse,
     define_vintages, vintages_longnames,
-    vintages_longnameslabel
+    vintages_longnameslabel, vintages_table,
+    midtime
 
 t_today = 2022
 # each interval is 500 years
@@ -105,35 +105,40 @@ function vintages_section(params)
 
 end
 
-"""
-    function diagnose_deltaresponse(loc)
+# """
+#     function diagnose_deltaresponse(loc)
 
-    Input: one location
+#     Input: one location
 
-    Side-effect: plot of delta response and heaviside response
-"""
-function diagnose_deltaresponse(loc)
-    g = agedistribution(loc)
-    tg = taudeltaresponse()
+#     Side-effect: plot of delta response and heaviside response
+# """
+# function diagnose_deltaresponse(loc)
+#     g = agedistribution(loc)
+#     tg = taudeltaresponse()
 
-    if loc[2] > 0
-        leglabel = string((loc[2]))*"°N, "*string(360-loc[1])*"°W, "*string(round(loc[3]/1000,sigdigits=2))*" km"
-    else
-        leglabel = string((-loc[2]))*"°S, "*string(360-loc[1])*"°W, "*string(round(loc[3]/1000,sigdigits=2))*" km"
-    end
+#     if loc[2] > 0
+#         leglabel = string((loc[2]))*"°N, "*string(360-loc[1])*"°W, "*string(round(loc[3]/1000,sigdigits=2))*" km"
+#     else
+#         leglabel = string((-loc[2]))*"°S, "*string(360-loc[1])*"°W, "*string(round(loc[3]/1000,sigdigits=2))*" km"
+#     end
 
-    # UPDATE THIS TO PLOTS.JL
-    # PyPlot version, not currently showing
-    # figure(2)
-    # clf()
-    # line1, = PyPlot.plot(tg,g,"black",label=leglabel[1])
-    # grid("true")
-    # xlabel("Lag, τ [yr]")
-    # ylabel("mass fraction per yr [1/yr]")
-    # legend()
-    # PyPlot.savefig(plotsdir("deltaresponse_at_loc.png"))
+#     # UPDATE THIS TO PLOTS.JL
+#     # PyPlot version, not currently showing
+#     # figure(2)
+#     # clf()
+#     # line1, = PyPlot.plot(tg,g,"black",label=leglabel[1])
+#     # grid("true")
+#     # xlabel("Lag, τ [yr]")
+#     # ylabel("mass fraction per yr [1/yr]")
+#     # legend()
+#     # PyPlot.savefig(plotsdir("deltaresponse_at_loc.png"))
+#     plot(tg,g,color=:black,label="35°N, 152°W, 3.5 km")
+#     plot!(tg,g[2],color=:red,label="20°S, 152°W, 3.5 km")
+#     plot!(tg,g[1]-g[2],color=:green,label="Δ")
+#     plot!(xlabel="Lag, τ [yr]",ylabel="mass fraction per yr [1/yr]")
+#     savefig(plotsdir("deltaresponse_NPACvSPAC.pdf"))
 
-end
+# end
 
 """
     function compare_deltaresponses(loc)
@@ -167,6 +172,52 @@ function compare_deltaresponses(loc)
 
 end
 
+function midtime(tinterval)
+    t̄ = OrderedDict{Symbol,Float64}()
+    for (kk,vv) in tinterval
+        #t̄[kk] =  (tinterval[vv][1] + tinterval[vv][2])/2
+        t̄[kk] =  (vv[1] + vv[2])/2
+
+        if kk == :preRWP
+            t̄[kk] = vv[2] - 250.0 # half of typical interval
+        end
+    end
+    return t̄
+end
+
+"""
+ make a covariance matrix that penalizes differences
+     greater than 1 mbar/century
+"""
+function covariance_temporalsmoothness(tinterval)
+    # make a covariance matrix
+    nv = length(tinterval)
+    t̄ = midtime(tinterval)
+    
+    #D = Matrix{Float64}(undef,nv,nv)
+    S⁻ = zeros(Float64,nv,nv)
+    scentury = 2 # mbar/ century expected trend
+    #counter = 0
+    for (mm,ii) in enumerate(keys(t̄))
+        for (nn,jj) in enumerate(keys(t̄))
+            if mm != nn
+                Δt = abs(t̄[ii] - t̄[jj])
+                #Δt = abs(ii - jj)
+                δ = zeros(nv)
+                δ[mm] = 1.0
+                δ[nn] = -1.0
+                S⁻ += 1/(scentury*Δt/100)^2 * (δ * transpose(δ))
+            end
+        end
+
+        # add constraint that MOD equals zero (Reference)
+        if ii == :MOD
+            S⁻[mm,mm] = 1/(0.01^2) # within 0.01
+        end
+    end
+    return S⁻
+end
+
 """
     function priorcovariance(tₚ,σₓ,σlong,Tlong)
 
@@ -190,6 +241,33 @@ function priorcovariance(tₚ,σₓ,σlong,Tlong)
     Cₓₓ = Diagonal((σₓ * ones(length(tₚ))).^2) + Clong
 
     return Cₓₓ
+end
+
+function vintages_table(loc,vintage,tinterval,longnamelabel)
+
+    col1 = "Vintage"
+    col2 = "Vintage Name"
+    col2b = "Years CE"
+    col3 = "Southern Region"
+    col4 = "Northern Region"
+
+    defs = Dict(col1 => vintage,
+                col2 => [longnamelabel[vv] for vv in vintage],
+                col2b => [tinterval[vv] for vv in vintage])
+    df = DataFrame(defs)
+
+    gnorth = Dict{Symbol,Float64}()
+    gsouth = Dict{Symbol,Float64}()
+    for vv in vintage
+        println(vv)
+        gtmp = vintage_atloc(vv,loc)
+        gnorth[vv] = gtmp[1]
+        gsouth[vv] = gtmp[2]
+    end
+
+    insertcols!(df, col3 => [round(100gsouth[vv],digits=1) for vv in vintage])
+    insertcols!(df, col4 => [round(100gnorth[vv],digits=1) for vv in vintage])
+    return df
 end
 
 # UPDATE TO USE BLUES.JL
