@@ -6,67 +6,44 @@ using DrWatson, TMI, TMItransient, Interpolations
 using LinearAlgebra
 using GGplot
 
-export vintages_planview, vintages_section, agedistribution,
-    taudeltaresponse, compare_deltaresponses, priorcovariance,
-    gaussmarkovsolution, anomalymatrix, magnitude, trendmatrix,
-    propagate, vintage_atloc, diagnose_deltaresponse
+export vintages_planview, vintages_section,
+    agedistribution,
+    taudeltaresponse, compare_deltaresponses,
+    priorcovariance,
+    gaussmarkovsolution, anomalymatrix, magnitude,
+    trendmatrix,
+    propagate, vintage_atloc, diagnose_deltaresponse,
+    define_vintages, vintages_longnames,
+    vintages_longnameslabel
 
-# const mpl = PyNULL()
-# const plt = PyNULL()
-# const cmocean = PyNULL()
-# const cartopy = PyNULL()
+t_today = 2022
+# each interval is 500 years
+define_vintages(t_today) =  OrderedDict(:MOD => (1800, t_today),
+                :LIA => (1300,1800),
+                :MCA => (800,1300),
+                :DACP => (300,800),
+                #:DACP2 => (550,650),
+                 :RWP => (-200,300),
+                 :preRWP => (-Inf,-200))
 
-# #Initialize all Python packages - install with conda through Julia
-# function __init__()
+vintages_longnames() = Dict(:MOD => "Modern Warming",
+                :LIA => "Little Ice Age",
+                :MCA => "Medieval Climate Anomaly",
+                :DACP => "Dark Ages Cold Period",
+                #:DACP2 => "Dark Ages Cold Period (strict)",
+                :RWP => "Roman Warm Period",
+                :preRWP => "Pre-Roman Warm Period")
 
-#     # following ClimatePlots.jl
-#     copy!(mpl, pyimport_conda("matplotlib", "matplotlib", "conda-forge"))
-#     copy!(cartopy, pyimport_conda("cartopy", "cartopy", "conda-forge"))
+function vintages_longnameslabel(longname)
 
-#     #copy!(plt, pyimport_conda("matplotlib.pyplot", "matplotlib", "conda-forge"))
-#     #copy!(cmocean, pyimport_conda("cmocean", "cmocean", "conda-forge"))
+    # add dates to longname
+    longnamelabel = Dict{Symbol,String}()
+    for (kk,vv) in longname
+        longnamelabel[kk] = longname[kk]*" "*string(tinterval[kk])*" CE"
+    end
 
-#     println("Python libraries installed")
-#  end
-
-# function planviewplotcartopy(c::Field{T}, depth, lims;titlelabel="section plot") where T <: Real
-
-#     cmap_seismic = get_cmap("seismic")
-#     #cmap_hot = get_cmap("hot_r")
-#     cmap_hot = get_cmap("inferno_r")
-#     cplan = planview(c,depth)
-
-#     fig = figure(202)
-#     clf()
-#     cenlon = -160.0
-#     proj0 = cartopy.crs.PlateCarree()
-#     proj = cartopy.crs.PlateCarree(central_longitude=cenlon)
-#     ax = fig.add_subplot(projection = proj)
-#     ax.set_global()
-#     #ax.coastlines()
-#     ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor="black", facecolor="black")
-    
-#     outdir = plotsdir()
-#     !isdir(outdir) && mkpath(outdir) 
-#     outfname = plotsdir("vintage.png")
-#     xlbl = "longitude "*L"[\degree E]"
-#     ylbl = "latitude "*L"[\degree N]"
-#     ax.set_title(titlelabel)
-#     ax.set_xlabel(xlbl)
-#     ax.set_ylabel(ylbl)
-#     gl = ax.gridlines(draw_labels=true, dms=true, x_inline=false, y_inline=false, crs=proj0)
-#     gl.top_labels = false
-#     gl.right_labels = false
-
-#     test = ax.contourf(c.γ.lon,c.γ.lat, cplan', lims, cmap=cmap_hot, transform = proj0)
-
-#     colorbar(test,label="[%]",orientation="vertical",ticks=lims, fraction = 0.03)
-#     CS = ax.contour(c.γ.lon,c.γ.lat, cplan', lims, colors="k", transform = proj0)
-#     ax.clabel(CS, CS.levels, inline=true, fontsize=10)
-
-#     savefig(outfname)
-
-# end
+    return longnamelabel
+end
 
 function vintages_planview(params)
 
@@ -99,7 +76,10 @@ function vintages_planview(params)
 
     lims = vcat(collect(0:5:50),100)
     # Plan view plots
-    GGplot.planviewplotcartopy(100g, depth, lims, titlelabel=tlabel)
+    plotfname = plotsdir("vintage.png")
+
+    #GGplot.planviewplotcartopy(100g, depth, lims, titlelabel=tlabel)
+    GGplot.planviewplotcartopy(100g, depth, lims, titlelabel=tlabel,fname=plotfname,cenlon=-160.0) 
     mv(plotsdir("vintage.png"),plotsdir(froot),force=true)
 
 end
@@ -119,9 +99,7 @@ function vintages_section(params)
     tlabel = "Vintage: "* longnamelabel[vintage] * ", lon="*string(lon)*"E"
     println(tlabel)
 
-    sectionplot(100g, lon, lims; titlelabel=tlabel) 
-
-    savefig(plotsdir(froot))
+    sectionplot(100g, lon, lims, titlelabel=tlabel,fname=plotsdir(froot)) 
 
 end
 

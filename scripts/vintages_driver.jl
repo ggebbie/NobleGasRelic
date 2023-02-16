@@ -53,9 +53,6 @@ isfile(datadir("vintages_TMI_4x4_2012.nc")) &&
 # planviews
 map(vintages_planview,dicts)
 
-# test one at a time
-vintages_planview(dicts[1])
-
 ## sections
 params = @strdict vintage lon tinterval longnamelabel
 dicts = dict_list(params)
