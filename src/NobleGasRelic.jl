@@ -5,6 +5,8 @@ module NobleGasRelic
 using DrWatson, TMI, TMItransient, Interpolations
 using LinearAlgebra
 using GGplot
+using OrderedCollections
+using Plots
 
 export vintages_planview, vintages_section,
     agedistribution,
@@ -34,7 +36,7 @@ vintages_longnames() = Dict(:MOD => "Modern Warming",
                 :RWP => "Roman Warm Period",
                 :preRWP => "Pre-Roman Warm Period")
 
-function vintages_longnameslabel(longname)
+function vintages_longnameslabel(longname,tinterval)
 
     # add dates to longname
     longnamelabel = Dict{Symbol,String}()
@@ -156,25 +158,12 @@ function compare_deltaresponses(loc)
         end           
     end
 
-    # UPDATE TO USE PLOTS.JL
-    # PyPlot version, not currently showing
-    # figure(2)
-    # clf()
-    # line1, = PyPlot.plot(tg,g[1],"black",label=leglabel[1])
-    # line2, = PyPlot.plot(tg,g[2],"red",label=leglabel[2])
-    # line3, = PyPlot.plot(tg,Δg,"green",label="Δ")
-    # grid("true")
-    # xlabel("Lag, τ [yr]")
-    # ylabel("mass fraction per yr [1/yr]")
-    # legend()
-    # PyPlot.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
-
-    # try to use Plots 
-    # Plots.plot(tg,g[1],color=:black,label="35°N, 152°W, 3.5 km")
-    # Plots.plot!(tg,g[2],color=:red,label="20°S, 152°W, 3.5 km")
-    # Plots.plot!(tg,g[1]-g[2],color=:green,label="Δ")
-    # plot!(xlabel="Lag, τ [yr]",ylabel="mass fraction per yr [1/yr]")
-    # Plots.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
+    # try to use Plots
+    plot(tg,g[1],color=:black,label="35°N, 152°W, 3.5 km")
+    plot!(tg,g[2],color=:red,label="20°S, 152°W, 3.5 km")
+    plot!(tg,g[1]-g[2],color=:green,label="Δ")
+    plot!(xlabel="Lag, τ [yr]",ylabel="mass fraction per yr [1/yr]")
+    savefig(plotsdir("deltaresponse_NPACvSPAC.pdf"))
 
 end
 
