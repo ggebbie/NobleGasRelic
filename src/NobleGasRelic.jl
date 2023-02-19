@@ -1,71 +1,53 @@
 module NobleGasRelic
 
-using PyCall
-using PyPlot
+using DataFrames
 using DrWatson, TMI, TMItransient, Interpolations
 using LinearAlgebra
 using GGplot
+using OrderedCollections
+using Plots
 
-export vintages_planview, vintages_section, agedistribution,
-    taudeltaresponse, compare_deltaresponses, priorcovariance,
-    gaussmarkovsolution, anomalymatrix, magnitude, trendmatrix,
-    propagate, vintage_atloc, diagnose_deltaresponse
+export vintages_planview, vintages_section,
+    agedistribution,
+    taudeltaresponse, compare_deltaresponses,
+    priorcovariance,
+    invcovariance_temporalsmoothness,
+    invcovariance_minenergy,
+    invcovariance_preindustrialmean,
+    gaussmarkovsolution, anomalymatrix, magnitude,
+    trendmatrix,
+    propagate, vintage_atloc, diagnose_deltaresponse,
+    define_vintages, vintages_longnames,
+    vintages_longnameslabel, vintages_table,
+    midtime
 
-const mpl = PyNULL()
-const plt = PyNULL()
-const cmocean = PyNULL()
-const cartopy = PyNULL()
+t_today = 2022
+# each interval is 500 years
+define_vintages(t_today) =  OrderedDict(:MOD => (1800, t_today),
+                :LIA => (1300,1800),
+                :MCA => (800,1300),
+                :DACP => (300,800),
+                #:DACP2 => (550,650),
+                 :RWP => (-200,300),
+                 :preRWP => (-Inf,-200))
 
-#Initialize all Python packages - install with conda through Julia
-function __init__()
+vintages_longnames() = Dict(:MOD => "Modern Warming",
+                :LIA => "Little Ice Age",
+                :MCA => "Medieval Climate Anomaly",
+                :DACP => "Dark Ages Cold Period",
+                #:DACP2 => "Dark Ages Cold Period (strict)",
+                :RWP => "Roman Warm Period",
+                :preRWP => "Pre-Roman Warm Period")
 
-    # following ClimatePlots.jl
-    copy!(mpl, pyimport_conda("matplotlib", "matplotlib", "conda-forge"))
-    copy!(cartopy, pyimport_conda("cartopy", "cartopy", "conda-forge"))
+function vintages_longnameslabel(longname,tinterval)
 
-    #copy!(plt, pyimport_conda("matplotlib.pyplot", "matplotlib", "conda-forge"))
-    #copy!(cmocean, pyimport_conda("cmocean", "cmocean", "conda-forge"))
+    # add dates to longname
+    longnamelabel = Dict{Symbol,String}()
+    for (kk,vv) in longname
+        longnamelabel[kk] = longname[kk]*" "*string(tinterval[kk])*" CE"
+    end
 
-    println("Python libraries installed")
- end
-
-function planviewplotcartopy(c::Field{T}, depth, lims;titlelabel="section plot") where T <: Real
-
-    cmap_seismic = get_cmap("seismic")
-    #cmap_hot = get_cmap("hot_r")
-    cmap_hot = get_cmap("inferno_r")
-    cplan = planview(c,depth)
-
-    fig = figure(202)
-    clf()
-    cenlon = -160.0
-    proj0 = cartopy.crs.PlateCarree()
-    proj = cartopy.crs.PlateCarree(central_longitude=cenlon)
-    ax = fig.add_subplot(projection = proj)
-    ax.set_global()
-    #ax.coastlines()
-    ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor="black", facecolor="black")
-    
-    outdir = plotsdir()
-    !isdir(outdir) && mkpath(outdir) 
-    outfname = plotsdir("vintage.png")
-    xlbl = "longitude "*L"[\degree E]"
-    ylbl = "latitude "*L"[\degree N]"
-    ax.set_title(titlelabel)
-    ax.set_xlabel(xlbl)
-    ax.set_ylabel(ylbl)
-    gl = ax.gridlines(draw_labels=true, dms=true, x_inline=false, y_inline=false, crs=proj0)
-    gl.top_labels = false
-    gl.right_labels = false
-
-    test = ax.contourf(c.γ.lon,c.γ.lat, cplan', lims, cmap=cmap_hot, transform = proj0)
-
-    colorbar(test,label="[%]",orientation="vertical",ticks=lims, fraction = 0.03)
-    CS = ax.contour(c.γ.lon,c.γ.lat, cplan', lims, colors="k", transform = proj0)
-    ax.clabel(CS, CS.levels, inline=true, fontsize=10)
-
-    savefig(outfname)
-
+    return longnamelabel
 end
 
 function vintages_planview(params)
@@ -75,6 +57,10 @@ function vintages_planview(params)
     # doing this every time, not so efficient
     
     Δ,τ = read_stepresponse()
+    println(size(Δ))
+    println(size(τ))
+    println(tinterval[vintage][1],tinterval[vintage][2])
+    
     g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ,interp="linear")
 
     # get the meta-data correct on the output.
@@ -95,7 +81,10 @@ function vintages_planview(params)
 
     lims = vcat(collect(0:5:50),100)
     # Plan view plots
-    planviewplotcartopy(100g, depth, lims, titlelabel=tlabel)
+    plotfname = plotsdir("vintage.png")
+
+    #GGplot.planviewplotcartopy(100g, depth, lims, titlelabel=tlabel)
+    GGplot.planviewplotcartopy(100g, depth, lims, titlelabel=tlabel,fname=plotfname,cenlon=-160.0) 
     mv(plotsdir("vintage.png"),plotsdir(froot),force=true)
 
 end
@@ -115,16 +104,14 @@ function vintages_section(params)
     tlabel = "Vintage: "* longnamelabel[vintage] * ", lon="*string(lon)*"E"
     println(tlabel)
 
-    sectionplot(100g, lon, lims; titlelabel=tlabel) 
-
-    savefig(plotsdir(froot))
+    sectionplot(100g, lon, lims, titlelabel=tlabel,fname=plotsdir(froot)) 
 
 end
 
 """
     function diagnose_deltaresponse(loc,vintage,tinterval)
 
-    Input: one location
+#     Input: one location
 
     Side-effect: plot of delta response and heaviside response
 """
@@ -215,27 +202,96 @@ function compare_deltaresponses(loc)
             leglabel[ii] = string((-loc[ii][2]))*"°S, "*string(360-loc[ii][1])*"°W, "*string(round(loc[ii][3]/1000,sigdigits=2))*" km"
         end           
     end
-    
-    # PyPlot version, not currently showing
-    figure(2)
-    clf()
-    line1, = PyPlot.plot(tg,g[1],"black",label=leglabel[1])
-    line2, = PyPlot.plot(tg,g[2],"red",label=leglabel[2])
-    line3, = PyPlot.plot(tg,Δg,"green",label="Δ")
-    grid("true")
-    xlabel("Lag, τ [yr]")
-    ylabel("mass fraction per yr [1/yr]")
-    legend()
-    PyPlot.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
 
-    # try to use Plots 
-    # Plots.plot(tg,g[1],color=:black,label="35°N, 152°W, 3.5 km")
-    # Plots.plot!(tg,g[2],color=:red,label="20°S, 152°W, 3.5 km")
-    # Plots.plot!(tg,g[1]-g[2],color=:green,label="Δ")
-    # plot!(xlabel="Lag, τ [yr]",ylabel="mass fraction per yr [1/yr]")
-    # Plots.savefig(plotsdir("deltaresponse_NPACvSPAC.png"))
+    # try to use Plots
+    plot(tg,g[1],color=:black,label="35°N, 152°W, 3.5 km")
+    plot!(tg,g[2],color=:red,label="20°S, 152°W, 3.5 km")
+    plot!(tg,g[1]-g[2],color=:green,label="Δ")
+    plot!(xlabel="Lag, τ [yr]",ylabel="mass fraction per yr [1/yr]")
+    savefig(plotsdir("deltaresponse_NPACvSPAC.pdf"))
 
 end
+
+function midtime(tinterval)
+    t̄ = OrderedDict{Symbol,Float64}()
+    for (kk,vv) in tinterval
+        #t̄[kk] =  (tinterval[vv][1] + tinterval[vv][2])/2
+        t̄[kk] =  (vv[1] + vv[2])/2
+
+        if kk == :preRWP
+            t̄[kk] = vv[2] - 250.0 # half of typical interval
+        end
+    end
+    return t̄
+end
+
+"""
+ make a covariance matrix that penalizes differences
+     greater than 1 mbar/century
+"""
+function invcovariance_temporalsmoothness(tinterval,scentury)
+    # make a covariance matrix
+    nv = length(tinterval)
+    t̄ = midtime(tinterval)
+    
+    #D = Matrix{Float64}(undef,nv,nv)
+    S⁻ = zeros(Float64,nv,nv)
+    #counter = 0
+    for (mm,ii) in enumerate(keys(t̄))
+        for (nn,jj) in enumerate(keys(t̄))
+            if mm != nn
+                Δt = abs(t̄[ii] - t̄[jj])
+                #Δt = abs(ii - jj)
+                δ = zeros(nv)
+                δ[mm] = 1.0
+                δ[nn] = -1.0
+                S⁻ += 1/(scentury*Δt/100)^2 * (δ * transpose(δ))
+            end
+        end
+
+        # add constraint that MOD equals zero (Reference)
+        #if ii == :MOD
+        #    S⁻[mm,mm] = 1/(0.01^2) # within 0.01
+        #end
+    end
+    return S⁻
+end
+
+"""
+    Diagonal inverse covariance matrix
+
+    scale_indiv = size of reasonable individual SLP change
+    scale_mean = set the strictness that sum of all SLP changes is zero
+"""
+function invcovariance_minenergy(vintage,scale_indiv::Number) 
+    # a standard diagonal covariance.
+    S⁻ = (1/scale_indiv^2)I
+end
+
+"""
+    inverse covariance to penalize nonzero
+    preindustrial mean
+"""
+function invcovariance_preindustrialmean(vintage,scale_mean)
+    # then put a constraint on the mean not being to far away (~1 dbar) from zero.
+
+    M = []
+    for n in vintage
+        if n == :MOD
+            push!(M,0.0)
+        else
+            push!(M,1.0)
+        end
+    end
+
+    # turn into an average
+    M ./= sum(M)
+    
+    #n = length(vintage)
+    #M = vcat(0,fill(1/(n-1),n-1)) # penalize the mean
+    return (1/scale_mean^2)*M*M'
+end
+
 
 """
     function priorcovariance(tₚ,σₓ,σlong,Tlong)
@@ -262,6 +318,34 @@ function priorcovariance(tₚ,σₓ,σlong,Tlong)
     return Cₓₓ
 end
 
+function vintages_table(loc,vintage,tinterval,longnamelabel)
+
+    col1 = "Vintage"
+    col2 = "Vintage Name"
+    col2b = "Years CE"
+    col3 = "Southern Region"
+    col4 = "Northern Region"
+
+    defs = Dict(col1 => vintage,
+                col2 => [longnamelabel[vv] for vv in vintage],
+                col2b => [tinterval[vv] for vv in vintage])
+    df = DataFrame(defs)
+
+    gnorth = Dict{Symbol,Float64}()
+    gsouth = Dict{Symbol,Float64}()
+    for vv in vintage
+        println(vv)
+        gtmp = vintage_atloc(vv,loc)
+        gnorth[vv] = gtmp[1]
+        gsouth[vv] = gtmp[2]
+    end
+
+    insertcols!(df, col3 => [round(100gsouth[vv],digits=1) for vv in vintage])
+    insertcols!(df, col4 => [round(100gnorth[vv],digits=1) for vv in vintage])
+    return df
+end
+
+# UPDATE TO USE BLUES.JL
 function gaussmarkovsolution(Eᵀ,y,σy,Cₓₓ)
 
     # Gauss-Markov solution method
