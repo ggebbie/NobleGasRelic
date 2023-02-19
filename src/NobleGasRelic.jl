@@ -10,7 +10,10 @@ using Plots
 export vintages_planview, vintages_section,
     agedistribution,
     taudeltaresponse, compare_deltaresponses,
-    priorcovariance, covariance_temporalsmoothness,
+    priorcovariance,
+    invcovariance_temporalsmoothness,
+    invcovariance_minenergy,
+    invcovariance_preindustrialmean,
     gaussmarkovsolution, anomalymatrix, magnitude,
     trendmatrix,
     propagate, vintage_atloc, diagnose_deltaresponse,
@@ -189,14 +192,13 @@ end
  make a covariance matrix that penalizes differences
      greater than 1 mbar/century
 """
-function covariance_temporalsmoothness(tinterval)
+function invcovariance_temporalsmoothness(tinterval,scentury)
     # make a covariance matrix
     nv = length(tinterval)
     t̄ = midtime(tinterval)
     
     #D = Matrix{Float64}(undef,nv,nv)
     S⁻ = zeros(Float64,nv,nv)
-    scentury = 2 # mbar/ century expected trend
     #counter = 0
     for (mm,ii) in enumerate(keys(t̄))
         for (nn,jj) in enumerate(keys(t̄))
@@ -211,12 +213,48 @@ function covariance_temporalsmoothness(tinterval)
         end
 
         # add constraint that MOD equals zero (Reference)
-        if ii == :MOD
-            S⁻[mm,mm] = 1/(0.01^2) # within 0.01
-        end
+        #if ii == :MOD
+        #    S⁻[mm,mm] = 1/(0.01^2) # within 0.01
+        #end
     end
     return S⁻
 end
+
+"""
+    Diagonal inverse covariance matrix
+
+    scale_indiv = size of reasonable individual SLP change
+    scale_mean = set the strictness that sum of all SLP changes is zero
+"""
+function invcovariance_minenergy(vintage,scale_indiv::Number) 
+    # a standard diagonal covariance.
+    S⁻ = (1/scale_indiv^2)I
+end
+
+"""
+    inverse covariance to penalize nonzero
+    preindustrial mean
+"""
+function invcovariance_preindustrialmean(vintage,scale_mean)
+    # then put a constraint on the mean not being to far away (~1 dbar) from zero.
+
+    M = []
+    for n in vintage
+        if n == :MOD
+            push!(M,0.0)
+        else
+            push!(M,1.0)
+        end
+    end
+
+    # turn into an average
+    M ./= sum(M)
+    
+    #n = length(vintage)
+    #M = vcat(0,fill(1/(n-1),n-1)) # penalize the mean
+    return (1/scale_mean^2)*M*M'
+end
+
 
 """
     function priorcovariance(tₚ,σₓ,σlong,Tlong)

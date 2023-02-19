@@ -78,12 +78,15 @@ for case in cases
 
     insertcols!(df, col5 => [round(x̃[vv],digits=1) for vv in vintage])
     insertcols!(df, col6 => [round(σx̃[vv],digits=1) for vv in vintage])
-    #CSV.write(datadir("sixvintages_"*case*".csv"),df)
+    CSV.write(datadir("sixvintages_"*case*".csv"),df)
 
     # make a plot
     t̄ = midtime(tinterval)
-    #plot(collect(values(t̄)),df[:,6],ribbon=df[:,7])
-    plot(collect(values(t̄)),df[:,6],ribbon=df[:,7],label=case,xlabel="years [CE]",ylabel="SLP anomaly [dbar]",xticks=(-450:250:2022))
-    savefig(plotsdir("SLP_CommonEra_"*case*".pdf"))
-
+    if case == "min_trend"
+        plot(collect(values(t̄)),df[:,6],ribbon=df[:,7],label=case,xlabel="calendar years",ylabel="SLP anomaly [dbar]")
+    else
+        plot!(collect(values(t̄)),df[:,6],ribbon=df[:,7],label=case,xlabel="years [CE]",ylabel="SLP anomaly [dbar]",xticks=(-450:250:2022))
+        
+    end
+    savefig(plotsdir("SLP_CommonEra_combined.pdf"))
 end
