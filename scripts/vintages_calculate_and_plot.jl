@@ -1,3 +1,6 @@
+#=
+Calculate vintage percentages as seen in planviews and Pacific sections
+=# 
 using Revise
 using NobleGasRelic
 using DrWatson

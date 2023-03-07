@@ -1,7 +1,9 @@
+#=
+`vintages_table_NPAC_SPAC.jl`: compute water-mass percentages for six vintages
+=#
 using Revise
 using NobleGasRelic
 using DrWatson
-#using PyPlot
 using LinearAlgebra
 using TMI
 using DataFrames

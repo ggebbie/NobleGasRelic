@@ -1,7 +1,7 @@
+# a script to understand and compare two TTDs
 using Revise
 using NobleGasRelic
 using DrWatson
-#using PyPlot
 using LinearAlgebra
 using TMI
 using DataFrames
@@ -20,7 +20,6 @@ longnamelabel = vintages_longnameslabel(longname,tinterval)
 vintage = collect(keys(tinterval))
 depth = collect(2000:500:4000)
 
-# a script to understand TTDs etc.
 
 # get 2 age distributions (TTDs), ultimately we have info about their difference
 n = 2
