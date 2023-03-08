@@ -34,6 +34,7 @@ E = Matrix(df)[:,4:5]
 ΔNe = 2.8#mbar # mbar
 σΔNe = 0.4#mbar # mbar
 
+# Use DrWatson to do 3 cases
 cases = ("min_trend","min_variance","min_trend_variance")
 scentury = 4
 referror = 0.0001

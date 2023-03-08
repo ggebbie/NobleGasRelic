@@ -4,13 +4,10 @@ Calculate vintage percentages as seen in planviews and Pacific sections
 using Revise
 using NobleGasRelic
 using DrWatson
-#using PyPlot
 using LinearAlgebra
 using TMI
 using DataFrames
 using Interpolations
-#using PlotlyJS
-#using Plots
 using OrderedCollections
 using CSV
 

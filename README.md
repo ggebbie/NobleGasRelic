@@ -23,8 +23,8 @@ everything should work out of the box, including correctly finding local paths.
 
 # Scripts
 
-- `vintages_table_NPAC_SPAC.jl`: compute water-mass percentages for six vintages
 - `vintages_calculate_and_plot.jl`: Calculate vintage percentages and create planviews and Pacific sections
+- `vintages_table_NPAC_SPAC.jl`: compute water-mass percentages for six vintages
 - `diagnose_responses.jl`: understand, plots, and compare two TTDs
 - `invert_sixvintages.jl`: invert for time history of each vintage, plot 3 different cases
 - `invert_sixvintages_oneplot.jl`: invert for time history of each vintage, plot 3 different cases on one plot
