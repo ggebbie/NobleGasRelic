@@ -27,6 +27,8 @@ loc[2] = (360-152,-10,3500) # South Pacific
 # read output of vintages_table_NPACvSPAC into DataFrame
 csvinput = datadir("sixvintages_"*TMIversion*".csv")
 
+df = DataFrame(CSV.File(csvinput))
+
 E = Matrix(df)[:,4:5]
 ΔE = transpose(E[:,2]-E[:,1])/100
 
@@ -39,7 +41,6 @@ scentury = 4
 referror = 0.0001
 σSLP₀ = 10.0 #dbar
 for case in cases
-    df = DataFrame(CSV.File(csvinput))
     
     # make a covariance matrix that penalizes differences
     # greater than 1 mbar/century
