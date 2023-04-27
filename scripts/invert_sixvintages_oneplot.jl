@@ -27,6 +27,8 @@ loc[2] = (360-152,-10,3500) # South Pacific
 # read output of vintages_table_NPACvSPAC into DataFrame
 csvinput = datadir("sixvintages_"*TMIversion*".csv")
 
+~isfile(csvinput) && include(scriptsdir("vintages_table_NPACvSPAC.jl"))
+
 df = DataFrame(CSV.File(csvinput))
 
 E = Matrix(df)[:,4:5]

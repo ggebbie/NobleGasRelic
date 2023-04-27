@@ -30,5 +30,7 @@ loc = Vector{Tuple}(undef,n)
 loc[1] = (360-152,35,3500) # North Pacific
 loc[2] = (360-152,-10,3500) # South Pacific
 
+~isfile(datadir("vintages_TMI_4x4_2012.nc")) && include("vintages_calculate_and_plot.jl")
+
 df = vintages_table(loc,vintage,tinterval,longnamelabel)
 CSV.write(datadir("sixvintages_"*TMIversion*".csv"),df)
