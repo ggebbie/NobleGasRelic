@@ -554,7 +554,7 @@ uuid = "9fa8497b-333b-5362-9e8d-4d0656e87820"
 
 [[deps.GGplot]]
 deps = ["Conda", "GoogleDrive", "HTTP", "Pkg", "PyCall", "PyPlot", "TMI"]
-git-tree-sha1 = "c0f9647fbfa3af42559ea44ef79dab49c76bc284"
+git-tree-sha1 = "b7cbc6693f3595b531e92ac00e1e0a6bc4e80ef2"
 repo-rev = "main"
 repo-url = "https://github.com/ggebbie/GGplot.jl"
 uuid = "1e05a8e1-7dec-4f9e-9d3d-7df52321841b"
@@ -1272,9 +1272,9 @@ version = "0.4.11"
 
 [[deps.PrecompileTools]]
 deps = ["Preferences"]
-git-tree-sha1 = "bc2bda41d798c2e66e7c44a11007bb329b15941b"
+git-tree-sha1 = "2e47054ffe7d0a8872e977c0d09eb4b3d162ebde"
 uuid = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
-version = "1.0.1"
+version = "1.0.2"
 
 [[deps.Preferences]]
 deps = ["TOML"]
@@ -1548,9 +1548,9 @@ version = "0.8.6"
 
 [[deps.StaticArrays]]
 deps = ["LinearAlgebra", "Random", "StaticArraysCore", "Statistics"]
-git-tree-sha1 = "63e84b7fdf5021026d0f17f76af7c57772313d99"
+git-tree-sha1 = "fd9a77cfd87116a27b2121c1988045f428b35a36"
 uuid = "90137ffa-7385-5640-81b9-e52037218182"
-version = "1.5.21"
+version = "1.5.22"
 
 [[deps.StaticArraysCore]]
 git-tree-sha1 = "6b7ba252635a5eff6a0b0664a41ee140a1c9e72a"
