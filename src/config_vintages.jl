@@ -2,6 +2,9 @@
 
 This information is used in multiple scripts
 =#
+
+TMIversion = "TMI_4x4x33"
+
 t_today = 2022 # calendar year
 
 # each interval is 500 years
