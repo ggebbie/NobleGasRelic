@@ -6,9 +6,10 @@ using LinearAlgebra
 using GGplot
 using OrderedCollections
 using Plots
+using JLD2
 
 export vintages_planview, vintages_section,
-    agedistribution,
+    vintages_calculate, agedistribution,
     taudeltaresponse, compare_deltaresponses,
     priorcovariance,
     invcovariance_temporalsmoothness,
@@ -50,27 +51,43 @@ function vintages_longnameslabel(longname,tinterval)
     return longnamelabel
 end
 
-function vintages_planview(params)
+function vintages_calculate(params)
+        
+    @unpack vintage, tinterval, longnamelabel = params 
 
-    @unpack vintage, depth, tinterval, longnamelabel = params 
-
-    # doing this every time, not so efficient
-    
+    # this function caches the relevant matfile
     Δ,τ = read_stepresponse()
-    println(size(Δ))
-    println(size(τ))
-    println(tinterval[vintage][1],tinterval[vintage][2])
+
+    println("Size of age distribution ",size(Δ))
+    println("Size of age axis ",size(τ))
+    println("Time interval of interest ",tinterval[vintage][1]," ",tinterval[vintage][2])
     
     g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ,interp="linear")
 
+    # save Grid if not already existing: only needed for NetCDF files, not jld2
+    #~isfile(datadir("Grid.jld2")) && jldsave(datadir("Grid.jld2");g.γ)
+     
     # get the meta-data correct on the output.
     gvintage = Field(g.tracer,g.γ,vintage,longnamelabel[vintage],"seawater mass fraction []")
     # save g to file if it hasn't been done before.
-    if isapprox(depth,2000) # kludge to not write twice
-        println("writing",depth,vintage)
-        !isdir(DrWatson.datadir()) && mkdir(DrWatson.datadir())
-        writefield(DrWatson.datadir("vintages_TMI_4x4_2012.nc"),gvintage)
-    end
+    #if isapprox(depth,2000) # kludge to not write twice
+    println("writing vintage ",vintage," ",longnamelabel[vintage])
+    !isdir(DrWatson.datadir()) && mkdir(DrWatson.datadir())
+            writefield(DrWatson.datadir("vintages_TMI_4x4_2012.nc"),gvintage)
+
+    # write in Julia native format also
+    fname = DrWatson.datadir(string(vintage)*"_TMI_4x4_2012.jld2")
+    jldsave(fname;gvintage)
+
+end
+
+function vintages_planview(params)
+
+    @unpack vintage, depth, tinterval, longnamelabel = params
+
+    # read vintages here
+    fname = DrWatson.datadir(string(vintage)*"_TMI_4x4_2012.jld2")
+    g = load(fname)["gvintage"]
     
     froot = plotsdir(savename("TMI_4x4_2012",params,"png",accesses=["vintage","depth"]))
     println(froot)
@@ -93,15 +110,19 @@ function vintages_section(params)
 
     @unpack vintage, lon, tinterval, longnamelabel = params 
 
+    # read vintages here.
+    fname = DrWatson.datadir(string(vintage)*"_TMI_4x4_2012.jld2")
+    g = load(fname)["gvintage"]
+    
     lims = vcat(collect(0:5:50),100)
     # doing this every time, not so efficient
-    Δ,τ = read_stepresponse()
-    local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
+    #Δ,τ = read_stepresponse()
+    #local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
     
     froot = plotsdir(savename("TMI_4x4_2012",params,"png",accesses=["vintage","lon"]))
     println(froot)
 
-    tlabel = "Vintage: "* longnamelabel[vintage] * ", lon="*string(lon)*"E"
+    tlabel = "Vintage: "* longnamelabel[vintage] * ", lon="*string(lon)*"°E"
     println(tlabel)
 
     sectionplot(100g, lon, lims, titlelabel=tlabel,fname=plotsdir(froot)) 

@@ -4,19 +4,17 @@ Calculate vintage percentages as seen in planviews and Pacific sections
 using Revise
 using NobleGasRelic
 using DrWatson
-using LinearAlgebra
-using TMI
-using DataFrames
-using Interpolations
+#using LinearAlgebra
+#using TMI
+#using DataFrames
+#using Interpolations
 using OrderedCollections
 using CSV
 
 include(srcdir("config_vintages.jl"))
 
-# lon must match grid exactly or else "dropped dims" error
-lon = [162, 210]
-
-params = @strdict vintage depth tinterval longnamelabel
+params = @strdict vintage tinterval longnamelabel
+#params = @strdict vintage depth tinterval longnamelabel
 dicts = dict_list(params)
 
 # avoid error with NetCDF key already existing by
@@ -25,10 +23,18 @@ isfile(datadir("vintages_TMI_4x4_2012.nc")) &&
     mv(datadir("vintages_TMI_4x4_2012.nc"),
        datadir("vintages_TMI_4x4_2012_SAVE.nc"),force=true)
 
+map(vintages_calculate,dicts)
+
 # planviews
+params = @strdict vintage depth tinterval longnamelabel
+dicts = dict_list(params)
+
 map(vintages_planview,dicts)
 
 ## sections
+# lon must match grid exactly or else "dropped dims" error
+lon = [162, 210]
+
 params = @strdict vintage lon tinterval longnamelabel
 dicts = dict_list(params)
 map(vintages_section,dicts)
