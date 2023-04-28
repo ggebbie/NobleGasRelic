@@ -11,14 +11,7 @@ using Interpolations
 using OrderedCollections
 using CSV
 
-t_today = 2022
-# each interval is 500 years
-tinterval = define_vintages(t_today)
-longname = vintages_longnames()
-# add dates to longname
-longnamelabel = vintages_longnameslabel(longname,tinterval)
-vintage = collect(keys(tinterval))
-depth = collect(2000:500:4000)
+include(srcdir("config_vintages.jl"))
 
 # lon must match grid exactly or else "dropped dims" error
 lon = [162, 210]

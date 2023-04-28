@@ -1,5 +1,5 @@
 #=
-`vintages_table_NPAC_SPAC.jl`: compute water-mass percentages for six vintages
+`vintages_table_NPAC_SPAC.jl`: compute water-mass percentages for six vintages at 2 locations
 =#
 using Revise
 using NobleGasRelic
@@ -13,15 +13,7 @@ using Interpolations
 using OrderedCollections
 using CSV
 
-TMIversion = "TMI_4x4x33"
-t_today = 2022
-# each interval is 500 years
-tinterval = define_vintages(t_today)
-longname = vintages_longnames()
-# add dates to longname
-longnamelabel = vintages_longnameslabel(longname,tinterval)
-vintage = collect(keys(tinterval))
-depth = collect(2000:500:4000)
+include(srcdir("config_vintages.jl"));
 
 # HERE DEEP NORTH PACIFIC VS. DEEP SOUTH PACIFIC 
 # get 2 age distributions (TTDs), ultimately we have info about their difference
