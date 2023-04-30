@@ -8,8 +8,6 @@ using LinearAlgebra
 using TMI
 using DataFrames
 using Interpolations
-#using PlotlyJS
-#using Plots
 using OrderedCollections
 using CSV
 
