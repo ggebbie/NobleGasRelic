@@ -277,7 +277,7 @@ function invcovariance_temporalsmoothness(tinterval,scentury)
                 δ = zeros(nv)
                 δ[mm] = 1.0
                 δ[nn] = -1.0
-                S⁻ += ustrip(1/(scentury*Δt/100)^2 * (δ * transpose(δ)))
+                S⁻ += ustrip(1/(scentury*Δt)^2 * (δ * transpose(δ)))
             end
         end
 
