@@ -4,10 +4,6 @@
 using Revise
 using NobleGasRelic
 using DrWatson
-using LinearAlgebra
-using TMI
-using DataFrames
-using Interpolations
 using OrderedCollections
 using CSV
 
