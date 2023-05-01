@@ -1,0 +1,122 @@
+using Revise
+using NobleGasRelic
+using DrWatson
+#using LinearAlgebra
+#using TMI
+using DataFrames
+#using Interpolations
+using OrderedCollections
+using CSV
+using BLUEs
+using DimensionalData
+using DimensionalData:@dim
+using Unitful
+using UnitfulLinearAlgebra
+
+include(srcdir("config_vintages.jl"));
+
+# HERE DEEP NORTH PACIFIC VS. DEEP SOUTH PACIFIC 
+n = 2
+loc = Vector{Tuple}(undef,n)
+loc[1] = (360-152,35,3500) # North Pacific
+loc[2] = (360-152,-10,3500) # South Pacific
+
+# read output of vintages_table_NPACvSPAC into DataFrame
+csvinput = datadir("sixvintages_"*TMIversion*".csv")
+
+# Do computations if necessary
+!isfile(csvinput) && include(scriptsdir("vintages_table_NPACvSPAC.jl"))
+
+df = DataFrame(CSV.File(csvinput))
+
+# extract list of vintages
+iloc = [4,5] # indices of vintages in DataFrame
+vintages = df[:,:Vintage]
+locnames = names(df)[iloc]
+    
+# associate vintages with a Dimension
+#@dim YearCE "years Common Era"
+@dim Vintage "vintage"
+@dim InteriorLocation "interior location"
+
+# observations have units of mbar
+mbar = u"mbar"
+M = length(iloc) # number of obs
+urange1 = fill(mbar,M)
+
+#urange2 = fill(K,Myears)
+
+# solution also has units of mbar
+N = length(vintages)
+udomain = fill(mbar,N)
+
+# manually determine that units on matrix are percent
+# please encode in CSV, probably in the header for portability
+percent = u"percent"
+Eparent = uconvert.(NoUnits,(Matrix(df)[:,iloc])percent)
+
+E = UnitfulDimMatrix(ustrip.(transpose(Eparent)),urange1,udomain,dims=(InteriorLocation(locnames),Vintage(vintages)))
+ΔE = E[2,:]-E[1,:]
+#ΔE = transpose(E[:,2]-E[:,1])/100
+
+include("invert_with_BLUEs.jl")
+
+# Solve it.
+ΔNe = 2.8#mbar # mbar
+σΔNe = 0.4#mbar # mbar
+
+cases = ("min_trend","min_variance","min_trend_variance")
+scentury = 4
+referror = 0.0001
+σSLP₀ = 10.0 #dbar
+for case in cases
+    
+    # make a covariance matrix that penalizes differences
+    # greater than 1 mbar/century
+    if case == "min_trend"
+        S⁻ = invcovariance_temporalsmoothness(tinterval,scentury)
+        S⁻ += invcovariance_preindustrialmean(vintage,referror)
+    elseif case == "min_variance"
+        S⁻ = invcovariance_minenergy(vintage,σSLP₀) # 20 dbar magnitude of SLP changes
+        S⁻ += invcovariance_preindustrialmean(vintage,referror)
+    elseif case == "min_trend_variance"
+        S⁻ = invcovariance_temporalsmoothness(tinterval,scentury)
+        S⁻ += invcovariance_minenergy(vintage,σSLP₀)
+        S⁻ += invcovariance_preindustrialmean(vintage,referror)
+    else
+        error("no case chosen")
+    end
+    Cₓₓ = inv(S⁻)
+
+    xtmp,P = gaussmarkovsolution(transpose(ΔE),ΔNe,σΔNe,Cₓₓ)
+    
+    #xtmp = (transpose(ΔE)*W⁻*ΔE + S⁻) \ (transpose(ΔE)*W⁻*y)
+    ỹ = (transpose(E)*xtmp)/100
+    ñ = ΔE*xtmp - ΔNe
+
+    println("noise = ",ñ)
+    
+    x̃ = OrderedDict{Symbol,Float64}()
+    σx̃ = OrderedDict{Symbol,Float64}()
+    for (mm,ii) in enumerate(vintage)
+        x̃[ii] = xtmp[mm]
+        σx̃[ii] = √P[mm,mm]
+    end
+
+    col5 = "SLP Anomaly [mbar]"
+    col6 = "SLP Error [mbar]"
+
+    insertcols!(df, col5 => [round(x̃[vv],digits=1) for vv in vintage])
+    insertcols!(df, col6 => [round(σx̃[vv],digits=1) for vv in vintage])
+    CSV.write(datadir("sixvintages_"*case*".csv"),df)
+
+    # make a plot
+    t̄ = midtime(tinterval)
+    if case == "min_trend"
+        plot(collect(values(t̄)),df[:,6],ribbon=df[:,7],label=case,xlabel="calendar years",ylabel="SLP anomaly [dbar]")
+    else
+        plot!(collect(values(t̄)),df[:,6],ribbon=df[:,7],label=case,xlabel="years [CE]",ylabel="SLP anomaly [dbar]",xticks=(-450:250:2022))
+        
+    end
+    savefig(plotsdir("SLP_CommonEra_combined.pdf"))
+end
