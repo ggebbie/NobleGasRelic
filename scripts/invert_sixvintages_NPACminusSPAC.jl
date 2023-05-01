@@ -1,10 +1,10 @@
+#using DrWatson
+#@quickactivate "NobleGasRelic"
+
 using Revise
 using NobleGasRelic
 using DrWatson
-#using LinearAlgebra
-#using TMI
 using DataFrames
-#using Interpolations
 using OrderedCollections
 using CSV
 using BLUEs
@@ -12,14 +12,15 @@ using DimensionalData
 using DimensionalData:@dim
 using Unitful
 using UnitfulLinearAlgebra
+using Measurements
 
 include(srcdir("config_vintages.jl"));
 
 # HERE DEEP NORTH PACIFIC VS. DEEP SOUTH PACIFIC 
 n = 2
 loc = Vector{Tuple}(undef,n)
-loc[1] = (360-152,35,3500) # North Pacific
-loc[2] = (360-152,-10,3500) # South Pacific
+loc[1] = (360-152,35,3500m) # North Pacific
+loc[2] = (360-152,-10,3500m) # South Pacific
 
 # read output of vintages_table_NPACvSPAC into DataFrame
 csvinput = datadir("sixvintages_"*TMIversion*".csv")
@@ -41,7 +42,7 @@ locnames = names(df)[iloc]
 
 # observations have units of mbar
 mbar = u"mbar"
-M = length(iloc) # number of obs
+M = 1 # just deal with the difference, otherwise length(iloc) # number of obs
 urange1 = fill(mbar,M)
 
 #urange2 = fill(K,Myears)
@@ -53,55 +54,72 @@ udomain = fill(mbar,N)
 # manually determine that units on matrix are percent
 # please encode in CSV, probably in the header for portability
 percent = u"percent"
-Eparent = uconvert.(NoUnits,(Matrix(df)[:,iloc])percent)
+𝐌 = uconvert.(NoUnits,(Matrix(df)[:,iloc])percent)
+𝐦 = Matrix(transpose(𝐌[:,2]-𝐌[:,1]))
 
-E = UnitfulDimMatrix(ustrip.(transpose(Eparent)),urange1,udomain,dims=(InteriorLocation(locnames),Vintage(vintages)))
-ΔE = E[2,:]-E[1,:]
-#ΔE = transpose(E[:,2]-E[:,1])/100
+E = UnitfulDimMatrix(ustrip.(𝐦),urange1,udomain,dims=(InteriorLocation([:NPACminusSPAC]),Vintage(vintages)))
 
-include("invert_with_BLUEs.jl")
+iszero(sum(E)) && println("not normalized correctly")
+
+#include("invert_with_BLUEs.jl")
 
 # Solve it.
-ΔNe = 2.8#mbar # mbar
-σΔNe = 0.4#mbar # mbar
+#p★ = 2.8mbar # bigstar
+#σp★ = 0.4mbar 
+Δp★ = (2.8 ± 0.4)mbar
 
 cases = ("min_trend","min_variance","min_trend_variance")
-scentury = 4
-referror = 0.0001
-σSLP₀ = 10.0 #dbar
+
+yr = u"yr"
+scentury = 4mbar/100yr
+σref = (0.0001)mbar # error in pre-industrial reference
+σSLP₀ = (10.0)mbar  # from existing SLP gradients and historical model simulations
+
 for case in cases
     
     # make a covariance matrix that penalizes differences
     # greater than 1 mbar/century
     if case == "min_trend"
+        # strip units from functions
         S⁻ = invcovariance_temporalsmoothness(tinterval,scentury)
-        S⁻ += invcovariance_preindustrialmean(vintage,referror)
+        S⁻ += invcovariance_preindustrialmean(vintage,σref)
     elseif case == "min_variance"
         S⁻ = invcovariance_minenergy(vintage,σSLP₀) # 20 dbar magnitude of SLP changes
-        S⁻ += invcovariance_preindustrialmean(vintage,referror)
+        S⁻ += invcovariance_preindustrialmean(vintage,σref)
     elseif case == "min_trend_variance"
         S⁻ = invcovariance_temporalsmoothness(tinterval,scentury)
         S⁻ += invcovariance_minenergy(vintage,σSLP₀)
-        S⁻ += invcovariance_preindustrialmean(vintage,referror)
+        S⁻ += invcovariance_preindustrialmean(vintage,σref)
     else
         error("no case chosen")
     end
-    Cₓₓ = inv(S⁻)
+    # add units at the end
+    Cxxdims = (last(dims(E)),last(dims(E)))
+    Cₓₓ = UnitfulDimMatrix(inv(S⁻),unitdomain(E),unitdomain(E).^-1,dims=Cxxdims)
 
-    xtmp,P = gaussmarkovsolution(transpose(ΔE),ΔNe,σΔNe,Cₓₓ)
-    
-    #xtmp = (transpose(ΔE)*W⁻*ΔE + S⁻) \ (transpose(ΔE)*W⁻*y)
-    ỹ = (transpose(E)*xtmp)/100
-    ñ = ΔE*xtmp - ΔNe
+    Cnndims = (first(dims(E)),first(dims(E)))
+    Cnn = UnitfulDimMatrix([ustrip(Measurements.uncertainty(Δp★).^2);;],unitrange(E),unitrange(E).^-1,dims=Cnndims)
 
-    println("noise = ",ñ)
+    y = UnitfulDimMatrix([ustrip(Measurements.value(Δp★));],unitrange(E),dims=(first(dims(E))))
+    x₀ = UnitfulDimMatrix(zeros(N),unitdomain(E),dims=(last(dims(E))))
     
-    x̃ = OrderedDict{Symbol,Float64}()
-    σx̃ = OrderedDict{Symbol,Float64}()
-    for (mm,ii) in enumerate(vintage)
-        x̃[ii] = xtmp[mm]
-        σx̃[ii] = √P[mm,mm]
-    end
+    uproblem = UnderdeterminedProblem(y,E,Cnn,Cₓₓ,x₀)
+    x̃ = solve(uproblem)
+    
+    # xtmp,P = gaussmarkovsolution(transpose(ΔE),ΔNe,σΔNe,Cₓₓ)
+    
+    # #xtmp = (transpose(ΔE)*W⁻*ΔE + S⁻) \ (transpose(ΔE)*W⁻*y)
+    # ỹ = (transpose(E)*xtmp)/100
+    # ñ = ΔE*xtmp - ΔNe
+
+    # println("noise = ",ñ)
+    
+    # x̃ = OrderedDict{Symbol,Float64}()
+    # σx̃ = OrderedDict{Symbol,Float64}()
+    # for (mm,ii) in enumerate(vintage)
+    #     x̃[ii] = xtmp[mm]
+    #     σx̃[ii] = √P[mm,mm]
+    # end
 
     col5 = "SLP Anomaly [mbar]"
     col6 = "SLP Error [mbar]"

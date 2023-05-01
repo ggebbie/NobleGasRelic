@@ -5,8 +5,10 @@ Gives a sense of the order of each script
 
 #=
 Numerical calculations section
-
 =#
+
+using Revise
+using DrWatson
 
 # calculations for global distribution of vintages
 include(scriptsdir("vintages_calculate.jl"))
@@ -16,7 +18,7 @@ include(scriptsdir("vintages_calculate.jl"))
 include(scriptsdir("vintages_table_NPACvSPAC.jl"))
 
 ## HERE: add inversion routines
-
+include(scriptsdir("invert_sixvintages_NPACminusSPAC.jl"))
 
 #=
 Diagostics Section
@@ -30,3 +32,17 @@ include(scriptsdir("vintages_sections.jl"))
 
 # Look at age distributions
 include(scriptsdir("diagnose_responses_NPACvSPAC.jl"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
