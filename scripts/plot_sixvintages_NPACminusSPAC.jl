@@ -29,7 +29,7 @@ for case in cases
 
     if case == "min_trend"
         # should read units from CSV
-        plot(ustrip.(collect(values(t̄))),ustrip.(df[:,6]mbar),ribbon=ustrip.(df[:,7]mbar),label=case,xlabel="calendar years [CE]",ylabel="SLP anomaly [mbar]")
+        plot(ustrip.(collect(values(t̄))),ustrip.(df[:,6]mbar),ribbon=ustrip.(df[:,7]mbar),label=case,xlabel="calendar years [CE]",ylabel="SLP anomaly [mbar]",xticks=(-450:250:2022))
         #plot(collect(values(t̄)),df[:,6]mbar,ribbon=df[:,7]mbar,label=case,xlabel="calendar years",ylabel="SLP anomaly")
     else
         plot!(ustrip.(collect(values(t̄))),df[:,6],ribbon=df[:,7],label=case)

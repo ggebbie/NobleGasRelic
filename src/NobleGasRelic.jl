@@ -281,10 +281,6 @@ function invcovariance_temporalsmoothness(tinterval,scentury)
             end
         end
 
-        # add constraint that MOD equals zero (Reference)
-        #if ii == :MOD
-        #    S⁻[mm,mm] = 1/(0.01^2) # within 0.01
-        #end
     end
     return S⁻
 end

@@ -20,6 +20,9 @@ include(scriptsdir("vintages_table_NPACvSPAC.jl"))
 # invert for sea level pressure
 include(scriptsdir("invert_sixvintages_NPACminusSPAC.jl"))
 
+# are the SLP differences significant?
+include(scriptsdir("vintages_SLP_differences.jl"))
+
 #=
 Diagostics Section
 =#

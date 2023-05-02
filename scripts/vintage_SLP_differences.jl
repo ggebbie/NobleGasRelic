@@ -17,25 +17,25 @@ using JLD2
 
 include(srcdir("config_vintages.jl"));
 
-# HERE DEEP NORTH PACIFIC VS. DEEP SOUTH PACIFIC 
-n = 2
-loc = Vector{Tuple}(undef,n)
-loc[1] = (360-152,35,3500m) # North Pacific
-loc[2] = (360-152,-10,3500m) # South Pacific
+# Solve three cases.
+cases = ["min_trend","min_variance","min_trend_variance"]
+vintage1 = vintage
+vintage2 = vintage
+    
+params = @strdict cases vintage1 vintage2
+dicts = dict_list(params) # 108 cases to test
 
-# read output of vintages_table_NPACvSPAC into DataFrame
-csvinput = datadir("sixvintages_"*TMIversion*".csv")
+## Stopped here
+for case in cases
 
-# Do computations if necessary
+jldinput = datadir("sixvintages_"*case*".jld2")
+
+load(jldinput)
+
+# Do computations if necessary UPDATE THIS
 !isfile(csvinput) && include(scriptsdir("vintages_table_NPACvSPAC.jl"))
 
-df = DataFrame(CSV.File(csvinput))
-
-# extract list of vintages
-iloc = [4,5] # indices of vintages in DataFrame
-vintages = df[:,:Vintage]
-locnames = names(df)[iloc]
-    
+    # NOT SURE IF THIS IS NECESSARy
 # associate vintages with a Dimension
 #@dim YearCE "years Common Era"
 @dim Vintage "vintage"
@@ -60,36 +60,21 @@ E = UnitfulDimMatrix(ustrip.(𝐦),urange1,udomain,dims=(InteriorLocation([:NPAC
 
 iszero(sum(E)) && println("not normalized correctly")
 
-Δp★ = (2.8 ± 0.4)mbar # observed value with 1σ uncertainty
-yr = u"yr"
-
-# other fixed parameters (could be `const`)
-scentury = 4mbar/100yr
-σref = (0.0001)mbar # error in pre-industrial reference
-σSLP₀ = (10.0)mbar  # from existing SLP gradients and historical model simulations
-
-# Solve three cases.
-cases = ("min_trend","min_variance","min_trend_variance")
-for case in cases
 
     df = DataFrame(CSV.File(csvinput)) # reload: seems to be having a problem without this.
     
     # make a covariance matrix that penalizes differences
     # greater than 1 mbar/century
     if case == "min_trend"
-        # strip units from functions
-        S⁻ = invcovariance_temporalsmoothness(tinterval,scentury)
-        S⁻ += invcovariance_preindustrialmean(vintage,σref)
+
     elseif case == "min_variance"
-        S⁻ = invcovariance_minenergy(vintage,σSLP₀) # 20 dbar magnitude of SLP changes
-        S⁻ += invcovariance_preindustrialmean(vintage,σref)
+
     elseif case == "min_trend_variance"
-        S⁻ = invcovariance_temporalsmoothness(tinterval,scentury)
-        S⁻ += invcovariance_minenergy(vintage,σSLP₀)
-        S⁻ += invcovariance_preindustrialmean(vintage,σref)
+
     else
         error("no case chosen")
     end
+
     # add units at the end
     Cxxdims = (last(dims(E)),last(dims(E)))
     Cₓₓ = UnitfulDimMatrix(inv(S⁻),unitdomain(E),unitdomain(E).^-1,dims=Cxxdims)
@@ -118,3 +103,4 @@ for case in cases
     jldsave(datadir("sixvintages_"*case*".jld2"),x̃)
 
 end
+    jldsave(datadir("sixvintages_"*case*".jld2"),x̃)
