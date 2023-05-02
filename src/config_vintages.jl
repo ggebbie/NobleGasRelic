@@ -9,6 +9,7 @@ const TMIversion = "TMI_4x4x33" # relax if run with other versions
 ENV["UNITFUL_FANCY_EXPONENTS"] = true
 const yr = u"yr"
 const m = u"m"
+const mbar = u"mbar"
 
 const t_today = 2022yr # calendar year
 
