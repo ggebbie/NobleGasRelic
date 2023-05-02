@@ -17,7 +17,7 @@ include(scriptsdir("vintages_calculate.jl"))
 # calls vintages_calculate if necessary
 include(scriptsdir("vintages_table_NPACvSPAC.jl"))
 
-## HERE: add inversion routines
+# invert for sea level pressure
 include(scriptsdir("invert_sixvintages_NPACminusSPAC.jl"))
 
 #=
@@ -33,16 +33,5 @@ include(scriptsdir("vintages_sections.jl"))
 # Look at age distributions
 include(scriptsdir("diagnose_responses_NPACvSPAC.jl"))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+# plot output from inversion
+include(scriptsdir("plot_sixvintages_NPACminusSPAC.jl"))

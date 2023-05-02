@@ -359,7 +359,9 @@ function vintages_table(loc,vintage,tinterval,longnamelabel)
 
     defs = Dict(col1 => vintage,
                 col2 => [longnamelabel[vv] for vv in vintage],
-                col2b => [tinterval[vv] for vv in vintage])
+
+                # I don't like "yr" in CSV output.
+                col2b => [ustrip.(tinterval[vv]) for vv in vintage])
     df = DataFrame(defs)
 
     gnorth = Dict{Symbol,Float64}()

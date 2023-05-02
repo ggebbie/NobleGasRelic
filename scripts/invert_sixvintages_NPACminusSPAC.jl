@@ -45,8 +45,6 @@ mbar = u"mbar"
 M = 1 # just deal with the difference, otherwise length(iloc) # number of obs
 urange1 = fill(mbar,M)
 
-#urange2 = fill(K,Myears)
-
 # solution also has units of mbar
 N = length(vintages)
 udomain = fill(mbar,N)
@@ -61,21 +59,19 @@ E = UnitfulDimMatrix(ustrip.(𝐦),urange1,udomain,dims=(InteriorLocation([:NPAC
 
 iszero(sum(E)) && println("not normalized correctly")
 
-#include("invert_with_BLUEs.jl")
-
-# Solve it.
-#p★ = 2.8mbar # bigstar
-#σp★ = 0.4mbar 
-Δp★ = (2.8 ± 0.4)mbar
-
-cases = ("min_trend","min_variance","min_trend_variance")
-
+Δp★ = (2.8 ± 0.4)mbar # observed value with 1σ uncertainty
 yr = u"yr"
+
+# other fixed parameters (could be `const`)
 scentury = 4mbar/100yr
 σref = (0.0001)mbar # error in pre-industrial reference
 σSLP₀ = (10.0)mbar  # from existing SLP gradients and historical model simulations
 
+# Solve three cases.
+cases = ("min_trend","min_variance","min_trend_variance")
 for case in cases
+
+    df = DataFrame(CSV.File(csvinput)) # reload: seems to be having a problem without this.
     
     # make a covariance matrix that penalizes differences
     # greater than 1 mbar/century
@@ -106,35 +102,24 @@ for case in cases
     uproblem = UnderdeterminedProblem(y,E,Cnn,Cₓₓ,x₀)
     x̃ = solve(uproblem)
     
-    # xtmp,P = gaussmarkovsolution(transpose(ΔE),ΔNe,σΔNe,Cₓₓ)
-    
-    # #xtmp = (transpose(ΔE)*W⁻*ΔE + S⁻) \ (transpose(ΔE)*W⁻*y)
-    # ỹ = (transpose(E)*xtmp)/100
-    # ñ = ΔE*xtmp - ΔNe
-
-    # println("noise = ",ñ)
-    
-    # x̃ = OrderedDict{Symbol,Float64}()
-    # σx̃ = OrderedDict{Symbol,Float64}()
-    # for (mm,ii) in enumerate(vintage)
-    #     x̃[ii] = xtmp[mm]
-    #     σx̃[ii] = √P[mm,mm]
-    # end
-
     col5 = "SLP Anomaly [mbar]"
     col6 = "SLP Error [mbar]"
 
-    insertcols!(df, col5 => [round(x̃[vv],digits=1) for vv in vintage])
-    insertcols!(df, col6 => [round(σx̃[vv],digits=1) for vv in vintage])
+    insertcols!(df, col5 => [round(x̃.v[At(string(vv))],digits=1) for vv in vintage])
+
+    #upstream bug in BLUEs.jl: dimensions are lost
+    # assume order is correct
+    #insertcols!(df, col6 => [round(x̃.σ[At(string(vv))],digits=1) for vv in vintage])
+    insertcols!(df, col6 => [round(ustrip(x̃.σ[vv]),digits=1) for vv in eachindex(vintage)])
     CSV.write(datadir("sixvintages_"*case*".csv"),df)
 
-    # make a plot
-    t̄ = midtime(tinterval)
-    if case == "min_trend"
-        plot(collect(values(t̄)),df[:,6],ribbon=df[:,7],label=case,xlabel="calendar years",ylabel="SLP anomaly [dbar]")
-    else
-        plot!(collect(values(t̄)),df[:,6],ribbon=df[:,7],label=case,xlabel="years [CE]",ylabel="SLP anomaly [dbar]",xticks=(-450:250:2022))
+    # # make a plot
+    # t̄ = midtime(tinterval)
+    # if case == "min_trend"
+    #     plot(collect(values(t̄)),df[:,6],ribbon=df[:,7],label=case,xlabel="calendar years",ylabel="SLP anomaly [dbar]")
+    # else
+    #     plot!(collect(values(t̄)),df[:,6],ribbon=df[:,7],label=case,xlabel="years [CE]",ylabel="SLP anomaly [dbar]",xticks=(-450:250:2022))
         
-    end
-    savefig(plotsdir("SLP_CommonEra_combined.pdf"))
+    # end
+    # savefig(plotsdir("SLP_CommonEra_combined.pdf"))
 end
