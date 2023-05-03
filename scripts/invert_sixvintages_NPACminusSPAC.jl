@@ -115,6 +115,6 @@ for case in cases
     CSV.write(datadir("sixvintages_"*case*".csv"),df)
 
     # Save full estimate in JLD2 format.
-    jldsave(datadir("sixvintages_"*case*".jld2"),x̃)
+    jldsave(datadir("sixvintages_"*case*".jld2");x̃)
 
 end

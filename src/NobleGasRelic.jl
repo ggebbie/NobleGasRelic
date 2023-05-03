@@ -374,6 +374,35 @@ function vintages_table(loc,vintage,tinterval,longnamelabel)
     return df
 end
 
+function pressure_table(vintage1,vintage2)
+
+    col1 = "Vintage"
+    col2 = "Vintage Name"
+    col2b = "Years CE"
+    col3 = "Southern Region"
+    col4 = "Northern Region"
+
+    defs = Dict(col1 => vintage,
+                col2 => [longnamelabel[vv] for vv in vintage],
+
+                # I don't like "yr" in CSV output.
+                col2b => [ustrip.(tinterval[vv]) for vv in vintage])
+    df = DataFrame(defs)
+
+    gnorth = Dict{Symbol,Float64}()
+    gsouth = Dict{Symbol,Float64}()
+    for vv in vintage
+        println(vv)
+        gtmp = vintage_atloc(vv,loc)
+        gnorth[vv] = gtmp[1]
+        gsouth[vv] = gtmp[2]
+    end
+
+    insertcols!(df, col3 => [round(100gsouth[vv],digits=1) for vv in vintage])
+    insertcols!(df, col4 => [round(100gnorth[vv],digits=1) for vv in vintage])
+    return df
+end
+
 # UPDATE TO USE BLUES.JL
 function gaussmarkovsolution(Eᵀ,y,σy,Cₓₓ)
 
