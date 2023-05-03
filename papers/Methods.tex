@@ -24,6 +24,7 @@
 \usepackage{graphicx}
 \usepackage{verbatim}
 \usepackage{amsmath}
+\usepackage{xcolor}
 %\usepackage[pdfborder={0 0 0},colorlinks=false,linkbordercolor={0 0 0},urlbordercolor={0 0 0}]{hyperref}
 %\usepackage[dvips, colorlinks=false, pdfborder={0 0 0}, urlcolor=blue, linkbordercolor={0 0 0},urlbordercolor={0 0 0}]{hyperref}
 %\usepackage{url}
@@ -452,51 +453,84 @@ the abyssal North Pacific \cite{Johnson--2008:Quantifying}, and would
 require an sea level pressure signal that is more than twice as large
 (30+ mbar) if the Antarctic region did not participate in the LIA.
 
-\subsection{SLP differences}
+\subsection{Sea-level pressure differences between climate eras}
 \label{sec:slp-differences}
 
-A table for min-trend-variance case.
-\begin{equation}
-\left[
-\begin{array}{cccccc}
-0.0 ± 0.0 mbar & 5.1 ± 7.2 mbar & -0.78 ± 8.9 mbar & -8.3 ± 8.6 mbar & -10.9 ± 8.3 mbar & -13.5 ± 8.2 mbar \\
--5.1 ± 7.2 mbar & 0.0 ± 0.0 mbar & -5.8 ± 7.9 mbar & -13.4 ± 6.7 mbar & -16.0 ± 6.1 mbar & -18.5 ± 5.6 mbar \\
-0.78 ± 8.9 mbar & 5.8 ± 7.9 mbar & 0.0 ± 0.0 mbar & -7.5 ± 7.8 mbar & -10.2 ± 8.1 mbar & -12.7 ± 8.3 mbar \\
-8.3 ± 8.6 mbar & 13.4 ± 6.7 mbar & 7.5 ± 7.8 mbar & 0.0 ± 0.0 mbar & -2.6 ± 8.5 mbar & -5.1 ± 9.5 mbar \\
-10.9 ± 8.3 mbar & 16.0 ± 6.1 mbar & 10.2 ± 8.1 mbar & 2.6 ± 8.5 mbar & 0.0 ± 0.0 mbar & -2.5 ± 9.0 mbar \\
-13.5 ± 8.2 mbar & 18.5 ± 5.6 mbar & 12.7 ± 8.3 mbar & 5.1 ± 9.5 mbar & 2.5 ± 9.0 mbar & 0.0 ± 0.0 mbar \\
-\end{array}
-\right]
-\end{equation}
+ \begin{table}
+\label{tab:slp-differences}
+   \caption{Sea-level pressure differences in millibars between
+     climate eras, as defined by the difference of the value during
+     one vintage (\textit{rows}) and another vintage
+     (\textit{columns}) calculated in the min-trend-variance
+     case. Some differences are significant at the 67\%
+     (\textbf{bold}) and 95\% (\textcolor{red}{\textbf{{bold, red}}}) confidence
+     levels. The vintages are: modern (MOD, 1800 - 2022 CE), Little
+     Ice Age (LIA, 1300- 1800 CE), Medieval Climate Anomaly (MCA, 800
+     - 1300), Dark Ages Cold Period (DACP, 300 -800 CE), Roman Warm
+     Period (RWP, 200 BCE - 300 CE), and the pre-Roman Warm Period
+     (preRWP, before 200 BCE). }
+   \centering {\small
+\begin{tabular}{l|cccccc}
+\hline
+Vintage  & MOD & LIA & MCA & DACP & RWP & pre-RWP  \\
+\hline
+%\left[
+%\begin{array}{cccccc}
+MOD & 0.0 ± 0.0  & 5.1 ± 7.2  & -0.78 ± 8.9  & -8.3 ± 8.6  & \bf{-10.9 ± 8.3}  & \bf{-13.5 ± 8.2}  \\
+LIA & -5.1 ± 7.2  & 0.0 ± 0.0  & -5.8 ± 7.9  & \textcolor{red}{\bf{-13.4 ± 6.7}}  & \textcolor{red}{\bf{-16.0 ± 6.1}}  & \textcolor{red}{\bf{-18.5 ± 5.6}}  \\
+MCA & 0.8 ± 8.9  & 5.8 ± 7.9  & 0.0 ± 0.0  & -7.5 ± 7.8  & \bf{-10.2 ± 8.1}  & \bf{-12.7 ± 8.3}  \\
+DACP & 8.3 ± 8.6  & \textcolor{red}{\bf{13.4 ± 6.7}}  & 7.5 ± 7.8  & 0.0 ± 0.0  & -2.6 ± 8.5  & -5.1 ± 9.5  \\
+RWP & \bf{10.9 ± 8.3}  & \textcolor{red}{\bf{16.0 ± 6.1}}  & \bf{10.2 ± 8.1}  & 2.6 ± 8.5  & 0.0 ± 0.0  & -2.5 ± 9.0  \\
+pre-RWP & \bf{13.5 ± 8.2}  & \textcolor{red}{\bf{18.5 ± 5.6}}  & \bf{12.7 ± 8.3}  & 5.1 ± 9.5  & 2.5 ± 9.0  & 0.0 ± 0.0  \\ 
+%\end{array}
+  % $l1$  & 260   \\
+  % $l2$  & 300   \\
+  % $l3$  & 340   \\
+  % $h1$  & 270   \\
+  % $h2$  & 250   \\
+  % $h3$  & 380   \\
+  % $r1$  & 370   \\
+  % $r2$  & 390   \\
+\hline
+%\multicolumn{2}{l}{$^{a}$Footnote text here.}
+\end{tabular}}
+\end{table}
+
+% A table for min-trend-variance case.
+% \begin{equation}
+% \left[
+% \begin{array}{cccccc}
+% 0.0 ± 0.0 mbar & 5.1 ± 7.2 mbar & -0.78 ± 8.9 mbar & -8.3 ± 8.6 mbar & -10.9 ± 8.3 mbar & -13.5 ± 8.2 mbar \\
+% -5.1 ± 7.2 mbar & 0.0 ± 0.0 mbar & -5.8 ± 7.9 mbar & -13.4 ± 6.7 mbar & -16.0 ± 6.1 mbar & -18.5 ± 5.6 mbar \\
+% 0.78 ± 8.9 mbar & 5.8 ± 7.9 mbar & 0.0 ± 0.0 mbar & -7.5 ± 7.8 mbar & -10.2 ± 8.1 mbar & -12.7 ± 8.3 mbar \\
+% 8.3 ± 8.6 mbar & 13.4 ± 6.7 mbar & 7.5 ± 7.8 mbar & 0.0 ± 0.0 mbar & -2.6 ± 8.5 mbar & -5.1 ± 9.5 mbar \\
+% 10.9 ± 8.3 mbar & 16.0 ± 6.1 mbar & 10.2 ± 8.1 mbar & 2.6 ± 8.5 mbar & 0.0 ± 0.0 mbar & -2.5 ± 9.0 mbar \\
+% 13.5 ± 8.2 mbar & 18.5 ± 5.6 mbar & 12.7 ± 8.3 mbar & 5.1 ± 9.5 mbar & 2.5 ± 9.0 mbar & 0.0 ± 0.0 mbar \\
+% \end{array}
+% \right]
+% \end{equation}
 
 
-Unfortunately, the table is missing labels. This is for the ``min$_{trend}$'' experiment.n
+% Unfortunately, the table is missing labels. This is for the ``min$_{trend}$'' experiment.n
 
 
-\begin{equation}
-\left[
-\begin{array}{cccccc}
-0.0 ± 0.0 mbar & 1.6 ± 9.2 mbar & -3.9 ± 12.0 mbar & -11.0 ± 12.0 mbar & -15.0 ± 11.0 mbar & -18.0 ± 11.0 mbar \\
--1.6 ± 9.2 mbar & 0.0 ± 0.0 mbar & -5.5 ± 10.0 mbar & -12.6 ± 8.9 mbar & -16.7 ± 7.5 mbar & -20.1 ± 7.1 mbar \\
-3.9 ± 12.0 mbar & 5.5 ± 10.0 mbar & 0.0 ± 0.0 mbar & -7.1 ± 9.6 mbar & -11.0 ± 10.0 mbar & -15.0 ± 11.0 mbar \\
-11.0 ± 12.0 mbar & 12.6 ± 8.9 mbar & 7.1 ± 9.6 mbar & 0.0 ± 0.0 mbar & -4.1 ± 11.0 mbar & -7.5 ± 13.0 mbar \\
-15.0 ± 11.0 mbar & 16.7 ± 7.5 mbar & 11.0 ± 10.0 mbar & 4.1 ± 11.0 mbar & 0.0 ± 0.0 mbar & -3.4 ± 12.0 mbar \\
-18.0 ± 11.0 mbar & 20.1 ± 7.1 mbar & 15.0 ± 11.0 mbar & 7.5 ± 13.0 mbar & 3.4 ± 12.0 mbar & 0.0 ± 0.0 mbar \\
-\end{array}
-\right]
-\end{equation}
+% \begin{equation}
+% \left[
+% \begin{array}{cccccc}
+% 0.0 ± 0.0 mbar & 1.6 ± 9.2 mbar & -3.9 ± 12.0 mbar & -11.0 ± 12.0 mbar & -15.0 ± 11.0 mbar & -18.0 ± 11.0 mbar \\
+% -1.6 ± 9.2 mbar & 0.0 ± 0.0 mbar & -5.5 ± 10.0 mbar & -12.6 ± 8.9 mbar & -16.7 ± 7.5 mbar & -20.1 ± 7.1 mbar \\
+% 3.9 ± 12.0 mbar & 5.5 ± 10.0 mbar & 0.0 ± 0.0 mbar & -7.1 ± 9.6 mbar & -11.0 ± 10.0 mbar & -15.0 ± 11.0 mbar \\
+% 11.0 ± 12.0 mbar & 12.6 ± 8.9 mbar & 7.1 ± 9.6 mbar & 0.0 ± 0.0 mbar & -4.1 ± 11.0 mbar & -7.5 ± 13.0 mbar \\
+% 15.0 ± 11.0 mbar & 16.7 ± 7.5 mbar & 11.0 ± 10.0 mbar & 4.1 ± 11.0 mbar & 0.0 ± 0.0 mbar & -3.4 ± 12.0 mbar \\
+% 18.0 ± 11.0 mbar & 20.1 ± 7.1 mbar & 15.0 ± 11.0 mbar & 7.5 ± 13.0 mbar & 3.4 ± 12.0 mbar & 0.0 ± 0.0 mbar \\
+% \end{array}
+% \right]
+% \end{equation}
 
-In the best scenario (i.e., min-trend-variance),
-RWP to LIA decrease of 16 pm 6 is significant at 95\%.
-preRWP to LIA decrease of 19 pm 6 is significant.
-Not significant at 95 percent with respect to modern values.
-
-In the ``min$_{trend}$'' case:
-RWP to LIA decrease of 17 pm 15 is significant at 95\%.
-preRWP to LIA decrease of 20 pm 14 is significant.
-Not significant at 95 percent with respect to modern values.
-
-
+The scenario with the highest degree of sophistication is labeled ``min-trend-variance.''
+The long-term trend between the Little Ice Age and the earliest climate eras (Dark Ages Cold Period, Roman Warm Period, and pre-Roman Warm Period) is significant at the 95\% confidence level (Table~\ref{tab:slp-differences}). In particular, we estimate that the pre-RWP to LIA decrease 
+of $19 \pm 11$ mbar ($2\sigma$ error bars) is well constrained by the data.
+Differences over shorter time periods are generally not significant. It is also difficult to find a significant relation to modern sea level pressures.
 
 % Our goal is to extract the decadal signal of water-mass change from
 % the historical temperature observations.  The historical-to-WOA
