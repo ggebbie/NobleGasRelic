@@ -1,0 +1,7 @@
+Vintage,Vintage Name,Years CE,Southern Region,Northern Region,SLP Anomaly [mbar],SLP Error [mbar]
+MOD,"Modern Warming (1800 yr, 2022 yr) CE","(1800, 2022)",3.1,1.8,-5.7,6.6
+LIA,"Little Ice Age (1300 yr, 1800 yr) CE","(1300, 1800)",28.1,16.0,-10.8,3.3
+MCA,"Medieval Climate Anomaly (800 yr, 1300 yr) CE","(800, 1300)",30.8,27.0,-4.9,5.2
+DACP,"Dark Ages Cold Period (300 yr, 800 yr) CE","(300, 800)",19.3,23.9,2.6,5.4
+RWP,"Roman Warm Period (-200 yr, 300 yr) CE","(-200, 300)",10.0,15.3,5.3,5.2
+preRWP,"Pre-Roman Warm Period (-Inf yr, -200 yr) CE","(-Inf, -200)",8.7,16.0,7.8,5.5
