@@ -24,6 +24,7 @@
 \usepackage{graphicx}
 \usepackage{verbatim}
 \usepackage{amsmath}
+\usepackage{xcolor}
 %\usepackage[pdfborder={0 0 0},colorlinks=false,linkbordercolor={0 0 0},urlbordercolor={0 0 0}]{hyperref}
 %\usepackage[dvips, colorlinks=false, pdfborder={0 0 0}, urlcolor=blue, linkbordercolor={0 0 0},urlbordercolor={0 0 0}]{hyperref}
 %\usepackage{url}
@@ -391,27 +392,145 @@ The resulting covariance matrix is $\mathbf{D}\mathbf{D}^{T}$ where each element
 
 \item Combined covariance matrix
 
-  The combined covariance matrix (labeled ``min-trend-variance'') is a sum of the covariance from (1) the definition of the reference level for preformed pressure anomalies, 2) the expected variance of preformed pressure about this reference level (``min-variance''), and 3) expectation of correlation between vintages that are adjacent in time (``min-trend'').
+  The combined covariance matrix (labeled ``min-trend-variance'') is a
+  sum of the covariance from (1) the definition of the reference level
+  for preformed pressure anomalies, 2) the expected variance of
+  preformed pressure about this reference level (``min-variance''),
+  and 3) expectation of correlation between vintages that are adjacent
+  in time (``min-trend'').
   
 \end{itemize}
 
 \subsection{Inverse solutions}
 
-The three inverse solutions use a variety of statistical input from different information sources but converge to a common solution between 1,500 and 500 years ago (Figure 2). This time period is marked by a statistically-significant ($p=0.05$) inferred decrease of sea level pressure by $14 pm 10$ mbar. The solutions also have common elements prior to 1,500 years ago.
-The greatest differences come in relation to LIA to modern changes. Because seawater in the abyssal North Pacific has very little modern vintage water, we are unable to conclusively place modern sea level pressure in context of previous changes. It is possible that modern sea level pressure is about the same as the LIA, or it could be as much as 15 mbar higher. 
+The three inverse solutions use a variety of statistical input from
+different information sources but converge to a common solution
+between the Little Ice Age and Roman Warm Period (2,000 and 500 years
+ago (Figure 2). This time period is marked by a
+statistically-significant ($p=0.05$) inferred decrease of sea level
+pressure by $17 \pm 8$ mbar. The solutions also have common elements
+prior to 1,500 years ago.  The greatest differences come in relation
+to LIA to modern changes. Because seawater in the abyssal North
+Pacific has very little modern vintage water, we are unable to
+conclusively place modern sea level pressure in context of previous
+changes. It is possible that modern sea level pressure is about the
+same as the LIA, or it could be as much as 15 mbar higher.
 
 \begin{figure}[htbp]
  \begin{center}
  \includegraphics[scale=0.9]{../plots/SLP_CommonEra_combined.pdf} \\
- \noindent{{\bf Figure 2. Inferred historial sea level pressure variations.} All results use the identical noble gas observational information, but differ in the assumed solution covariance matrix (blue: min-trend, red: min-variance, green: min-trend-variance). Error ribbons represent the $1\sigma$ uncertainty level. Results from each vintage are plotted as a single value at the midpoint of the interval.} \end{center} 
+ \noindent{{\bf Figure 2. Inferred historical sea level pressure
+     variations.} All results use the identical noble gas
+   observational information, but differ in the assumed solution
+   covariance matrix (blue: min-trend, red: min-variance, green:
+   min-trend-variance). Error ribbons represent the $1\sigma$ uncertainty
+   level. Results from each vintage are plotted as a single value at
+   the midpoint of the interval.} \end{center}
 \end{figure}
 
-The problem formulation has proceeded by assuming that sea level pressure changes are globally-uniform, but such large changes in sea level pressure would indicate a change in the mass of the atmosphere. The low solubility of nitrogen and oxygen in seawater make such large mass changes unlikely. Instead, the results of the inverse solution should be interpreted in a more nuanced way. Signals in abyssal waters primarily reflect surface signals at the sites of formation in polar oceans, and we lack direct information about the tropics and subtropics here. Thus, inferred changes in the LIA and earlier should be interpreted as changes in polar oceans, and constraints on the global mass of the atmosphere can be balanced by opposing changes in the tropics.
+The problem formulation has proceeded by assuming that sea level
+pressure changes are globally-uniform, but such large changes in sea
+level pressure would indicate a change in the mass of the
+atmosphere. The low solubility of nitrogen and oxygen in seawater make
+such large mass changes unlikely. Instead, the results of the inverse
+solution should be interpreted in a more nuanced way. Signals in
+abyssal waters primarily reflect surface signals at the sites of
+formation in polar oceans, and we lack direct information about the
+tropics and subtropics here. Thus, inferred changes in the LIA and
+earlier should be interpreted as changes in polar oceans, and
+constraints on the global mass of the atmosphere can be balanced by
+opposing changes in the tropics.
 
-It is still debated whether the LIA is a North Atlantic-centric or global phenomenon. Our inferences of sea level pressure change are best interpreted as changes in polar regions and cannot directly be pinpointed as northern or southern hemisphere variability. Due to the water-mass composition of the abyssal Pacific being dominated by southern source waters, however, we suggest that the noble gas signal is more easily explained by changes in and around Antarctica. North Atlantic waters occupy less than half the mass of Antarctic waters in the abyssal North Pacific \cite{Johnson--2008:Quantifying}, and would require an sea level pressure signal that is more than twice as large (30+ mbar) if the Antarctic region did not participate in the LIA . 
+It is still debated whether the LIA is a North Atlantic-centric or
+global phenomenon. Our inferences of sea level pressure change are
+best interpreted as changes in polar regions and cannot directly be
+pinpointed as northern or southern hemisphere variability. Due to the
+water-mass composition of the abyssal Pacific being dominated by
+southern source waters, however, we suggest that the noble gas signal
+is more easily explained by changes in and around Antarctica. North
+Atlantic waters occupy less than half the mass of Antarctic waters in
+the abyssal North Pacific \cite{Johnson--2008:Quantifying}, and would
+require an sea level pressure signal that is more than twice as large
+(30+ mbar) if the Antarctic region did not participate in the LIA.
+
+\subsection{Sea-level pressure differences between climate eras}
+\label{sec:slp-differences}
+
+ \begin{table}
+\label{tab:slp-differences}
+   \caption{Sea-level pressure differences in millibars between
+     climate eras, as defined by the difference of the value during
+     one vintage (\textit{rows}) and another vintage
+     (\textit{columns}) calculated in the min-trend-variance
+     case. Some differences are significant at the 67\%
+     (\textbf{bold}) and 95\% (\textcolor{red}{\textbf{{bold, red}}}) confidence
+     levels. The vintages are: modern (MOD, 1800 - 2022 CE), Little
+     Ice Age (LIA, 1300- 1800 CE), Medieval Climate Anomaly (MCA, 800
+     - 1300), Dark Ages Cold Period (DACP, 300 -800 CE), Roman Warm
+     Period (RWP, 200 BCE - 300 CE), and the pre-Roman Warm Period
+     (preRWP, before 200 BCE). }
+   \centering {\small
+\begin{tabular}{l|cccccc}
+\hline
+Vintage  & MOD & LIA & MCA & DACP & RWP & pre-RWP  \\
+\hline
+%\left[
+%\begin{array}{cccccc}
+MOD & 0.0 ± 0.0  & 5.1 ± 7.2  & -0.78 ± 8.9  & -8.3 ± 8.6  & \bf{-10.9 ± 8.3}  & \bf{-13.5 ± 8.2}  \\
+LIA & -5.1 ± 7.2  & 0.0 ± 0.0  & -5.8 ± 7.9  & \textcolor{red}{\bf{-13.4 ± 6.7}}  & \textcolor{red}{\bf{-16.0 ± 6.1}}  & \textcolor{red}{\bf{-18.5 ± 5.6}}  \\
+MCA & 0.8 ± 8.9  & 5.8 ± 7.9  & 0.0 ± 0.0  & -7.5 ± 7.8  & \bf{-10.2 ± 8.1}  & \bf{-12.7 ± 8.3}  \\
+DACP & 8.3 ± 8.6  & \textcolor{red}{\bf{13.4 ± 6.7}}  & 7.5 ± 7.8  & 0.0 ± 0.0  & -2.6 ± 8.5  & -5.1 ± 9.5  \\
+RWP & \bf{10.9 ± 8.3}  & \textcolor{red}{\bf{16.0 ± 6.1}}  & \bf{10.2 ± 8.1}  & 2.6 ± 8.5  & 0.0 ± 0.0  & -2.5 ± 9.0  \\
+pre-RWP & \bf{13.5 ± 8.2}  & \textcolor{red}{\bf{18.5 ± 5.6}}  & \bf{12.7 ± 8.3}  & 5.1 ± 9.5  & 2.5 ± 9.0  & 0.0 ± 0.0  \\ 
+%\end{array}
+  % $l1$  & 260   \\
+  % $l2$  & 300   \\
+  % $l3$  & 340   \\
+  % $h1$  & 270   \\
+  % $h2$  & 250   \\
+  % $h3$  & 380   \\
+  % $r1$  & 370   \\
+  % $r2$  & 390   \\
+\hline
+%\multicolumn{2}{l}{$^{a}$Footnote text here.}
+\end{tabular}}
+\end{table}
+
+% A table for min-trend-variance case.
+% \begin{equation}
+% \left[
+% \begin{array}{cccccc}
+% 0.0 ± 0.0 mbar & 5.1 ± 7.2 mbar & -0.78 ± 8.9 mbar & -8.3 ± 8.6 mbar & -10.9 ± 8.3 mbar & -13.5 ± 8.2 mbar \\
+% -5.1 ± 7.2 mbar & 0.0 ± 0.0 mbar & -5.8 ± 7.9 mbar & -13.4 ± 6.7 mbar & -16.0 ± 6.1 mbar & -18.5 ± 5.6 mbar \\
+% 0.78 ± 8.9 mbar & 5.8 ± 7.9 mbar & 0.0 ± 0.0 mbar & -7.5 ± 7.8 mbar & -10.2 ± 8.1 mbar & -12.7 ± 8.3 mbar \\
+% 8.3 ± 8.6 mbar & 13.4 ± 6.7 mbar & 7.5 ± 7.8 mbar & 0.0 ± 0.0 mbar & -2.6 ± 8.5 mbar & -5.1 ± 9.5 mbar \\
+% 10.9 ± 8.3 mbar & 16.0 ± 6.1 mbar & 10.2 ± 8.1 mbar & 2.6 ± 8.5 mbar & 0.0 ± 0.0 mbar & -2.5 ± 9.0 mbar \\
+% 13.5 ± 8.2 mbar & 18.5 ± 5.6 mbar & 12.7 ± 8.3 mbar & 5.1 ± 9.5 mbar & 2.5 ± 9.0 mbar & 0.0 ± 0.0 mbar \\
+% \end{array}
+% \right]
+% \end{equation}
 
 
+% Unfortunately, the table is missing labels. This is for the ``min$_{trend}$'' experiment.n
 
+
+% \begin{equation}
+% \left[
+% \begin{array}{cccccc}
+% 0.0 ± 0.0 mbar & 1.6 ± 9.2 mbar & -3.9 ± 12.0 mbar & -11.0 ± 12.0 mbar & -15.0 ± 11.0 mbar & -18.0 ± 11.0 mbar \\
+% -1.6 ± 9.2 mbar & 0.0 ± 0.0 mbar & -5.5 ± 10.0 mbar & -12.6 ± 8.9 mbar & -16.7 ± 7.5 mbar & -20.1 ± 7.1 mbar \\
+% 3.9 ± 12.0 mbar & 5.5 ± 10.0 mbar & 0.0 ± 0.0 mbar & -7.1 ± 9.6 mbar & -11.0 ± 10.0 mbar & -15.0 ± 11.0 mbar \\
+% 11.0 ± 12.0 mbar & 12.6 ± 8.9 mbar & 7.1 ± 9.6 mbar & 0.0 ± 0.0 mbar & -4.1 ± 11.0 mbar & -7.5 ± 13.0 mbar \\
+% 15.0 ± 11.0 mbar & 16.7 ± 7.5 mbar & 11.0 ± 10.0 mbar & 4.1 ± 11.0 mbar & 0.0 ± 0.0 mbar & -3.4 ± 12.0 mbar \\
+% 18.0 ± 11.0 mbar & 20.1 ± 7.1 mbar & 15.0 ± 11.0 mbar & 7.5 ± 13.0 mbar & 3.4 ± 12.0 mbar & 0.0 ± 0.0 mbar \\
+% \end{array}
+% \right]
+% \end{equation}
+
+The scenario with the highest degree of sophistication is labeled ``min-trend-variance.''
+The long-term trend between the Little Ice Age and the earliest climate eras (Dark Ages Cold Period, Roman Warm Period, and pre-Roman Warm Period) is significant at the 95\% confidence level (Table~\ref{tab:slp-differences}). In particular, we estimate that the pre-RWP to LIA decrease 
+of $19 \pm 11$ mbar ($2\sigma$ error bars) is well constrained by the data.
+Differences over shorter time periods are generally not significant. It is also difficult to find a significant relation to modern sea level pressures.
 
 % Our goal is to extract the decadal signal of water-mass change from
 % the historical temperature observations.  The historical-to-WOA

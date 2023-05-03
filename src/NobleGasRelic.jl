@@ -6,9 +6,11 @@ using LinearAlgebra
 using GGplot
 using OrderedCollections
 using Plots
+using JLD2
+using Unitful
 
 export vintages_planview, vintages_section,
-    agedistribution,
+    vintages_calculate, agedistribution,
     taudeltaresponse, compare_deltaresponses,
     priorcovariance,
     invcovariance_temporalsmoothness,
@@ -21,15 +23,17 @@ export vintages_planview, vintages_section,
     vintages_longnameslabel, vintages_table,
     midtime
 
-t_today = 2022
+const yr = u"yr"
+#const t_today = 2022yr
+
 # each interval is 500 years
-define_vintages(t_today) =  OrderedDict(:MOD => (1800, t_today),
-                :LIA => (1300,1800),
-                :MCA => (800,1300),
-                :DACP => (300,800),
+define_vintages(t_today) =  OrderedDict(:MOD => (1800yr, t_today),
+                :LIA => (1300yr,1800yr),
+                :MCA => (800yr,1300yr),
+                :DACP => (300yr,800yr),
                 #:DACP2 => (550,650),
-                 :RWP => (-200,300),
-                 :preRWP => (-Inf,-200))
+                 :RWP => (-200yr,300yr),
+                 :preRWP => ((-Inf)yr,-200yr))
 
 vintages_longnames() = Dict(:MOD => "Modern Warming",
                 :LIA => "Little Ice Age",
@@ -50,27 +54,45 @@ function vintages_longnameslabel(longname,tinterval)
     return longnamelabel
 end
 
-function vintages_planview(params)
+function vintages_calculate(params)
+        
+    @unpack vintage, tinterval, longnamelabel = params 
 
-    @unpack vintage, depth, tinterval, longnamelabel = params 
-
-    # doing this every time, not so efficient
     
+    # this function caches the relevant matfile
     Δ,τ = read_stepresponse()
-    println(size(Δ))
-    println(size(τ))
-    println(tinterval[vintage][1],tinterval[vintage][2])
-    
-    g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ,interp="linear")
 
+    println("Size of age distribution ",size(Δ))
+    println("Size of age axis ",size(τ))
+    println("Time interval of interest ",first(tinterval[vintage])," ",last(tinterval[vintage]))
+
+    # units not tested upstream
+    g = vintagedistribution(ustrip(first(tinterval[vintage])),ustrip(last(tinterval[vintage])),Δ,τ,interp="linear")
+
+    # save Grid if not already existing: only needed for NetCDF files, not jld2
+    #~isfile(datadir("Grid.jld2")) && jldsave(datadir("Grid.jld2");g.γ)
+     
     # get the meta-data correct on the output.
     gvintage = Field(g.tracer,g.γ,vintage,longnamelabel[vintage],"seawater mass fraction []")
     # save g to file if it hasn't been done before.
-    if isapprox(depth,2000) # kludge to not write twice
-        println("writing",depth,vintage)
-        !isdir(DrWatson.datadir()) && mkdir(DrWatson.datadir())
-        writefield(DrWatson.datadir("vintages_TMI_4x4_2012.nc"),gvintage)
-    end
+    #if isapprox(depth,2000) # kludge to not write twice
+    println("writing vintage ",vintage," ",longnamelabel[vintage])
+    !isdir(DrWatson.datadir()) && mkdir(DrWatson.datadir())
+            writefield(DrWatson.datadir("vintages_TMI_4x4_2012.nc"),gvintage)
+
+    # write in Julia native format also
+    fname = DrWatson.datadir(string(vintage)*"_TMI_4x4_2012.jld2")
+    jldsave(fname;gvintage)
+
+end
+
+function vintages_planview(params)
+
+    @unpack vintage, depth, tinterval, longnamelabel = params
+
+    # read vintages here
+    fname = DrWatson.datadir(string(vintage)*"_TMI_4x4_2012.jld2")
+    g = load(fname)["gvintage"]
     
     froot = plotsdir(savename("TMI_4x4_2012",params,"png",accesses=["vintage","depth"]))
     println(froot)
@@ -93,15 +115,19 @@ function vintages_section(params)
 
     @unpack vintage, lon, tinterval, longnamelabel = params 
 
+    # read vintages here.
+    fname = DrWatson.datadir(string(vintage)*"_TMI_4x4_2012.jld2")
+    g = load(fname)["gvintage"]
+    
     lims = vcat(collect(0:5:50),100)
     # doing this every time, not so efficient
-    Δ,τ = read_stepresponse()
-    local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
+    #Δ,τ = read_stepresponse()
+    #local g = vintagedistribution(tinterval[vintage][1],tinterval[vintage][2],Δ,τ)
     
     froot = plotsdir(savename("TMI_4x4_2012",params,"png",accesses=["vintage","lon"]))
     println(froot)
 
-    tlabel = "Vintage: "* longnamelabel[vintage] * ", lon="*string(lon)*"E"
+    tlabel = "Vintage: "* longnamelabel[vintage] * ", lon="*string(lon)*"°E"
     println(tlabel)
 
     sectionplot(100g, lon, lims, titlelabel=tlabel,fname=plotsdir(froot)) 
@@ -212,14 +238,20 @@ function compare_deltaresponses(loc)
 
 end
 
+"""
+    function midtime(tinterval)
+
+    function not fully general
+    assumes input has units
+"""
 function midtime(tinterval)
-    t̄ = OrderedDict{Symbol,Float64}()
+    t̄ = OrderedDict{Symbol,Quantity}()
     for (kk,vv) in tinterval
         #t̄[kk] =  (tinterval[vv][1] + tinterval[vv][2])/2
         t̄[kk] =  (vv[1] + vv[2])/2
 
         if kk == :preRWP
-            t̄[kk] = vv[2] - 250.0 # half of typical interval
+            t̄[kk] = vv[2] - 250.0yr # half of typical interval
         end
     end
     return t̄
@@ -233,7 +265,7 @@ function invcovariance_temporalsmoothness(tinterval,scentury)
     # make a covariance matrix
     nv = length(tinterval)
     t̄ = midtime(tinterval)
-    
+
     #D = Matrix{Float64}(undef,nv,nv)
     S⁻ = zeros(Float64,nv,nv)
     #counter = 0
@@ -245,14 +277,10 @@ function invcovariance_temporalsmoothness(tinterval,scentury)
                 δ = zeros(nv)
                 δ[mm] = 1.0
                 δ[nn] = -1.0
-                S⁻ += 1/(scentury*Δt/100)^2 * (δ * transpose(δ))
+                S⁻ += ustrip(1/(scentury*Δt)^2 * (δ * transpose(δ)))
             end
         end
 
-        # add constraint that MOD equals zero (Reference)
-        #if ii == :MOD
-        #    S⁻[mm,mm] = 1/(0.01^2) # within 0.01
-        #end
     end
     return S⁻
 end
@@ -260,13 +288,12 @@ end
 """
     Diagonal inverse covariance matrix
 
+    a standard diagonal covariance
+
     scale_indiv = size of reasonable individual SLP change
     scale_mean = set the strictness that sum of all SLP changes is zero
 """
-function invcovariance_minenergy(vintage,scale_indiv::Number) 
-    # a standard diagonal covariance.
-    S⁻ = (1/scale_indiv^2)I
-end
+invcovariance_minenergy(vintage,scale_indiv::Number) = ustrip.((1/scale_indiv^2)I(length(vintage)))
 
 """
     inverse covariance to penalize nonzero
@@ -289,7 +316,7 @@ function invcovariance_preindustrialmean(vintage,scale_mean)
     
     #n = length(vintage)
     #M = vcat(0,fill(1/(n-1),n-1)) # penalize the mean
-    return (1/scale_mean^2)*M*M'
+    return ustrip((1/scale_mean^2)*M*M')
 end
 
 
@@ -328,7 +355,38 @@ function vintages_table(loc,vintage,tinterval,longnamelabel)
 
     defs = Dict(col1 => vintage,
                 col2 => [longnamelabel[vv] for vv in vintage],
-                col2b => [tinterval[vv] for vv in vintage])
+
+                # I don't like "yr" in CSV output.
+                col2b => [ustrip.(tinterval[vv]) for vv in vintage])
+    df = DataFrame(defs)
+
+    gnorth = Dict{Symbol,Float64}()
+    gsouth = Dict{Symbol,Float64}()
+    for vv in vintage
+        println(vv)
+        gtmp = vintage_atloc(vv,loc)
+        gnorth[vv] = gtmp[1]
+        gsouth[vv] = gtmp[2]
+    end
+
+    insertcols!(df, col3 => [round(100gsouth[vv],digits=1) for vv in vintage])
+    insertcols!(df, col4 => [round(100gnorth[vv],digits=1) for vv in vintage])
+    return df
+end
+
+function pressure_table(vintage1,vintage2)
+
+    col1 = "Vintage"
+    col2 = "Vintage Name"
+    col2b = "Years CE"
+    col3 = "Southern Region"
+    col4 = "Northern Region"
+
+    defs = Dict(col1 => vintage,
+                col2 => [longnamelabel[vv] for vv in vintage],
+
+                # I don't like "yr" in CSV output.
+                col2b => [ustrip.(tinterval[vv]) for vv in vintage])
     df = DataFrame(defs)
 
     gnorth = Dict{Symbol,Float64}()

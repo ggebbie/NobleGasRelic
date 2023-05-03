@@ -7,16 +7,9 @@ using DataFrames
 using Interpolations
 using OrderedCollections
 using CSV
+using BLUEs
 
-TMIversion = "TMI_4x4x33"
-t_today = 2022
-# each interval is 500 years
-tinterval = define_vintages(t_today)
-longname = vintages_longnames()
-# add dates to longname
-longnamelabel = vintages_longnameslabel(longname,tinterval)
-vintage = collect(keys(tinterval))
-depth = collect(2000:500:4000)
+include(srcdir("config_vintages.jl"));
 
 # HERE DEEP NORTH PACIFIC VS. DEEP SOUTH PACIFIC 
 n = 2
@@ -26,6 +19,13 @@ loc[2] = (360-152,-10,3500) # South Pacific
 
 # read output of vintages_table_NPACvSPAC into DataFrame
 csvinput = datadir("sixvintages_"*TMIversion*".csv")
+
+# Do computations if necessary
+!isfile(csvinput) && include(scriptsdir("vintages_table_NPACvSPAC.jl"))
+
+df = DataFrame(CSV.File(csvinput))
+
+include("invert_with_BLUEs.jl")
 
 E = Matrix(df)[:,4:5]
 ΔE = transpose(E[:,2]-E[:,1])/100
@@ -39,7 +39,6 @@ scentury = 4
 referror = 0.0001
 σSLP₀ = 10.0 #dbar
 for case in cases
-    df = DataFrame(CSV.File(csvinput))
     
     # make a covariance matrix that penalizes differences
     # greater than 1 mbar/century

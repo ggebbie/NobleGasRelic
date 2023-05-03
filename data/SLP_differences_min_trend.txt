@@ -1,0 +1,13 @@
+\begin{equation}
+\left[
+\begin{array}{cccccc}
+0.0 ± 0.0 mbar & 1.6 ± 9.2 mbar & -3.9 ± 12.0 mbar & -11.0 ± 12.0 mbar & -15.0 ± 11.0 mbar & -18.0 ± 11.0 mbar \\
+-1.6 ± 9.2 mbar & 0.0 ± 0.0 mbar & -5.5 ± 10.0 mbar & -12.6 ± 8.9 mbar & -16.7 ± 7.5 mbar & -20.1 ± 7.1 mbar \\
+3.9 ± 12.0 mbar & 5.5 ± 10.0 mbar & 0.0 ± 0.0 mbar & -7.1 ± 9.6 mbar & -11.0 ± 10.0 mbar & -15.0 ± 11.0 mbar \\
+11.0 ± 12.0 mbar & 12.6 ± 8.9 mbar & 7.1 ± 9.6 mbar & 0.0 ± 0.0 mbar & -4.1 ± 11.0 mbar & -7.5 ± 13.0 mbar \\
+15.0 ± 11.0 mbar & 16.7 ± 7.5 mbar & 11.0 ± 10.0 mbar & 4.1 ± 11.0 mbar & 0.0 ± 0.0 mbar & -3.4 ± 12.0 mbar \\
+18.0 ± 11.0 mbar & 20.1 ± 7.1 mbar & 15.0 ± 11.0 mbar & 7.5 ± 13.0 mbar & 3.4 ± 12.0 mbar & 0.0 ± 0.0 mbar \\
+\end{array}
+\right]
+\end{equation}
+
