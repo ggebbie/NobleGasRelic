@@ -2,7 +2,7 @@
 
 ## Algorithms to invert modern oceanic noble gas anomalies for the history of sea level pressure
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://github.com/ggebbie/NobleGasRelic/papers/Methods.pdf)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://github.com/ggebbie/NobleGasRelic/blob/main/papers/Methods.pdf)
 
 This code base is using the Julia Language and [DrWatson](https://juliadynamics.github.io/DrWatson.jl/stable/)
 to make a reproducible scientific project named
@@ -12,7 +12,7 @@ It is authored by G Jake Gebbie <ggebbie@whoi.edu>.
 
 # Scientific context
 
-The scientific context for the algorithms is given in `papers/Methods.pdf`. 
+The scientific context for the algorithms is given in [`papers/Methods.pdf`](https://github.com/ggebbie/NobleGasRelic/blob/main/papers/Methods.pdf).
 
 # Reproducibility
 
