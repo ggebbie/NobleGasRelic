@@ -4,6 +4,13 @@ Gives a sense of the order of each script
 =#
 
 #=
+Activate project environment
+=#
+using Revise
+using DrWatson # must be available in default environment
+@quickactivate "NobleGasRelic"
+
+#=
 Numerical calculations section
 =#
 
