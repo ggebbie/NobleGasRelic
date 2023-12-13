@@ -97,7 +97,7 @@ function vintages_planview(params)
     froot = plotsdir(savename("TMI_4x4_2012",params,"png",accesses=["vintage","depth"]))
     println(froot)
 
-    tlabel = "Vintage: "* longnamelabel[vintage] * ", depth="*string(depth)*"m"
+    tlabel = "Vintage: "* longnamelabel[vintage] * ", depth="*string(depth)
     println(tlabel)
     #fname = "vintage_"*string(v)*"_"*string(depth)*"m.png"
 
@@ -106,7 +106,7 @@ function vintages_planview(params)
     plotfname = plotsdir("vintage.png")
 
     #GGplot.planviewplotcartopy(100g, depth, lims, titlelabel=tlabel)
-    GGplot.planviewplotcartopy(100g, depth, lims, titlelabel=tlabel,fname=plotfname,cenlon=-160.0) 
+    GGplot.planviewplotcartopy(100g, ustrip(depth), lims, titlelabel=tlabel,fname=plotfname,cenlon=-160.0) 
     mv(plotsdir("vintage.png"),plotsdir(froot),force=true)
 
 end

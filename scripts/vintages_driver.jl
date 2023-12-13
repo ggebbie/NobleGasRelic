@@ -28,7 +28,7 @@ include(scriptsdir("vintages_table_NPACvSPAC.jl"))
 include(scriptsdir("invert_sixvintages_NPACminusSPAC.jl"))
 
 # are the SLP differences significant?
-include(scriptsdir("vintages_SLP_differences.jl"))
+include(scriptsdir("vintage_SLP_differences.jl"))
 
 #=
 Diagostics Section

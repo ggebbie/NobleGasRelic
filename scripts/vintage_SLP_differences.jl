@@ -14,12 +14,13 @@ using Unitful
 using UnitfulLinearAlgebra
 using Measurements
 using JLD2
+using Latexify
 
 include(srcdir("config_vintages.jl"));
 
 # associate vintages with a Dimension
 #@dim Vintage "vintage"
-#@dim Diagnostic "vintage differences"
+@dim Diagnostic "vintage differences"
 
 # Solve three cases.
 cases = ["min_trend","min_variance","min_trend_variance"]
@@ -72,9 +73,9 @@ for case in cases
     caseroot = "SLP_differences_"*case
     redirect_stdio(stdout=datadir(caseroot*".txt"), stderr=datadir(caseroot*"_err.txt")) do
         println(latexify(load(datadir(caseroot*".jld2"))["Δp★"]))
-        #println(stderr, "hello error")
     end
+    
+    # send output to REPL; loses header info unfortunately
+    latexify(load(datadir(caseroot*".jld2"))["Δp★"])
 end
-# send output to REPL; loses header info unfortunately
-latexify(load(datadir(caseroot*".jld2"))["Δp★"])
 
