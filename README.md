@@ -4,6 +4,8 @@
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://github.com/ggebbie/NobleGasRelic/blob/main/papers/Methods.pdf)
 
+[![DOI](https://zenodo.org/badge/496315869.svg)](https://zenodo.org/doi/10.5281/zenodo.10368927)
+
 This code base is using the Julia Language and [DrWatson](https://juliadynamics.github.io/DrWatson.jl/stable/)
 to make a reproducible scientific project named
 > NobleGasRelic
